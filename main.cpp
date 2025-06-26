@@ -12,6 +12,7 @@ unordered_map<string, pair<int, int>> teacherClass_index;  // "T1-S1"
 
 vector<string> index_daySlot; 
 vector<string> index_teacherClass;
+vector<int> remaining_duration;
 
 void load_instance(){
     XMLDocument doc;
@@ -52,16 +53,17 @@ void load_instance(){
 
         teacherClass_index.insert(make_pair(id, make_pair(count, duration)));
         index_teacherClass.push_back(id);
+        remaining_duration.push_back(duration);
 
         count++;
     }
 }
 
-void validade(){
+void validate_info(){
     cout << daySlot_index.size() << " " << teacherClass_index.size() << "\n";
 
     for (const auto& entry : daySlot_index) {
-        cout << "Time ID: " << entry.first << ", Index: " << entry.second.first << ", Duration: " << entry.second.second << endl;
+        cout << "Time ID: " << entry.first << ", Index: " << entry.second.first << ", Duration: " << entry.second.second << "\n";
     }
 
     cout << "\n";
@@ -73,20 +75,35 @@ void validade(){
     cout << "\n";
 
     for (const auto& entry : teacherClass_index) {
-        cout << "Teacher-Class ID: " << entry.first << ", Index: " << entry.second.first << ", Duration: " << entry.second.second << endl;
+        cout << "Teacher-Class ID: " << entry.first << ", Index: " << entry.second.first << ", Duration: " << entry.second.second << "\n";
     }
 
     cout << "\n";
     
     for(int i=0; i<index_teacherClass.size(); i++){
-        cout << "Teacher-Class ID: " << index_teacherClass[i] << ", Index: " << i << "\n"; 
+        cout << "Teacher-Class ID: " << index_teacherClass[i] << " Remaining: " << remaining_duration[i] <<", Index: " << i << "\n"; 
     }
+
+}
+
+int evaluate(){
+    // hard: alocar todas os eventos durante sua duração; 
+    // dividir eventos em horário simples e duplo
+    // eventos duplos devem ser alocados em horários válidos
+    // nenhum recurso(professor/aluno) pode ser alocado em dois eventos no mesmo slot
+    // cada evento no máximo uma aula por dia
+    // professores não podem ser alocados em dias que não trabalham
+    // 
+    //soft: exatamente 1 horário duplo(1)
+    // exatamente 2 horários duplos(1), ao menos
+    // nenhuma janela livre entre aulas de um mesmo professor em um dia
+    // para um conjunto de professores no máximo 2 dias de aula por semana
 
 }
 
 int main() {
     load_instance();
-    validade();
+    validate_info();
 
     vector<vector<int>> solution(daySlot_index.size());
 
