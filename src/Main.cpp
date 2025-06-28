@@ -112,47 +112,15 @@ void load_instance(vector<string> &paths)
             return;
         }
 
-        XMLElement *resources = root->FirstChildElement("Resources");
-        if (!resources)
+        XMLElement *instances = root->FirstChildElement("Instances");
+        XMLElement *instance = instances->FirstChildElement("Instance");
+        if (!instance)
         {
-            cerr << "Warning: No Resources element found in " << path << "\n";
+            cerr << "Error: No Instance element found in " << path << "\n";
+                return;
         }
         else
         {
-            for (XMLElement *r = resources->FirstChildElement("Resource");
-                 r;
-                 r = r->NextSiblingElement("Resource"))
-            {
-                {
-                    // dentro de <Resource> ... <ResourceType Reference="Teacher" /> ou "Class"
-                    XMLElement *rt = r->FirstChildElement("ResourceType");
-                    if (!rt)
-                        continue;
-                    const char *type = rt->Attribute("Reference");
-                    if (strcmp(type, "Teacher") == 0)
-                    {
-                        ++num_teachers;
-                    }
-                    else if (strcmp(type, "Class") == 0)
-                    {
-                        ++num_classes;
-                    }
-                }
-            }
-
-            XMLElement *instances = root->FirstChildElement("Instances");
-            if (!instances)
-            {
-                cerr << "Error: No Instances element found in " << path << "\n";
-                return;
-            }
-
-            XMLElement *instance = instances->FirstChildElement("Instance");
-            if (!instance)
-            {
-                cerr << "Error: No Instance element found in " << path << "\n";
-                return;
-            }
             XMLElement *times = instance->FirstChildElement("Times");
             if (!times)
             {
@@ -178,6 +146,33 @@ void load_instance(vector<string> &paths)
                 }
 
                 count++;
+            }
+
+            XMLElement *resources = instance->FirstChildElement("Resources");
+            if (!times)
+            {
+                cerr << "Error: No Resources element found in " << path << "\n";
+                return;
+            }
+            for (XMLElement *r = resources->FirstChildElement("Resource");
+                 r;
+                 r = r->NextSiblingElement("Resource"))
+            {
+                {
+                    // dentro de <Resource> ... <ResourceType Reference="Teacher" /> ou "Class"
+                    XMLElement *rt = r->FirstChildElement("ResourceType");
+                    if (!rt)
+                        continue;
+                    const char *type = rt->Attribute("Reference");
+                    if (strcmp(type, "Teacher") == 0)
+                    {
+                        ++num_teachers;
+                    }
+                    else if (strcmp(type, "Class") == 0)
+                    {
+                        ++num_classes;
+                    }
+                }
             }
 
             XMLElement *events = instance->FirstChildElement("Events");
@@ -377,12 +372,12 @@ int evaluate()
 int main()
 {
     vector<string> paths = {
-        "instances/instance1.xml",
-        // "instances/instance2.xml",
-        // "instances/instance3.xml",
-        // "instances/instance4.xml",
-        // "instances/instance5.xml",
-        // "instances/instance6.xml"
+        "../instances/instance1.xml",
+        "../instances/instance2.xml",
+        "../instances/instance3.xml",
+        "../instances/instance4.xml",
+        "../instances/instance5.xml",
+        "../instances/instance6.xml"
     };
 
     load_instance(paths);
@@ -390,7 +385,7 @@ int main()
 
     int num_slots = 25, num_events = teacher_class_index.size();
 
-    cout << "view:" << teacher_class_index.size() << num_classes * num_teachers << endl;
+    cout << "view:" << teacher_class_index.size() << " " <<  num_classes * num_teachers << endl;
 
     vector<vector<int>> occTeacher(num_teachers, vector<int>(num_slots, 0));
     vector<vector<int>> occClass(num_classes, vector<int>(num_slots, 0));
