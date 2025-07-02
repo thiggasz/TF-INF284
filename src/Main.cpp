@@ -315,7 +315,6 @@ void Instance::load(const string &filename)
                 c.max_value = atoi(max_elem->GetText());
             }
 
-            // Armazenar para uso posterior
             for (const string &course_id : c.applies_to_events)
             {
                 course_split_constraints[course_id] = make_pair(c.min_value, c.max_value);
@@ -700,7 +699,7 @@ vector<Solution> load_solutions_from_xml(const string &filename, const Instance 
     return solutions;
 }
 
-Solution generateGreedy(const Instance &instance, int max_attempts = 100)
+Solution generate_greedy(const Instance &instance, int max_attempts = 100)
 {
     Solution sol;
     int attempt = 0;
@@ -778,7 +777,7 @@ Solution generateGreedy(const Instance &instance, int max_attempts = 100)
                     event_used_days[e.id].insert(t.day);
                     remaining_duration[e.id] -= 2;
                     allocated = true;
-                 
+
                     break;
                 }
 
@@ -849,13 +848,170 @@ Solution generateGreedy(const Instance &instance, int max_attempts = 100)
     return sol;
 }
 
+/*
+ALGORITMO IteratedGreedy(instância, max_iterações, taxa_destruição)
+    // Fase Inicial
+    S = generate_greedy(instância)         // Gera solução inicial com método guloso
+    S_melhor = S                          // Inicializa a melhor solução
+
+    PARA iter = 1 ATÉ max_iterações FAÇA
+        // Fase de Destruição
+        S_parcial = destruir(S, taxa_destruição)
+
+        // Fase de Reconstrução
+        S_nova = reconstruir(S_parcial, instância)
+
+        // Critério de Aceitação
+        SE custo(S_nova) < custo(S) ENTÃO
+            S = S_nova
+            SE custo(S_nova) < custo(S_melhor) ENTÃO
+                S_melhor = S_nova
+            FIM SE
+        SENÃO
+            // Aceitação probabilística para evitar mínimos locais
+            SE rand() < exp((custo(S) - custo(S_nova))/T) ENTÃO
+                S = S_nova
+            FIM SE
+        FIM SE
+
+        // Atualizar temperatura (opcional)
+        T = resfriar(T)
+    FIM PARA
+
+    RETORNAR S_melhor
+FIM ALGORITMO*/
+
+vector<string> select_events(Solution solution, int num_events_to_destroy)
+{
+    vector<string> selected_events;
+
+    if (num_events_to_destroy <= 0 || solution.event_allocations.empty())
+        return selected_events;
+
+    // Copia os eventos para um vetor auxiliar para sorteio
+    vector<string> all_events;
+    for (const auto &e : solution.event_allocations)
+        all_events.push_back(e.first);
+
+    unsigned seed = chrono::system_clock::now().time_since_epoch().count();
+    mt19937 rng(seed);
+
+    // Embaralha os eventos
+    shuffle(all_events.begin(), all_events.end(), rng);
+
+    // Seleciona os primeiros num_events_to_destroy ou todos se houver menos
+    int count = min<int>(num_events_to_destroy, all_events.size());
+    selected_events.insert(selected_events.end(), all_events.begin(), all_events.begin() + count);
+
+    return selected_events;
+}
+
+void remove_allocations(string e, Solution &solution)
+{
+    for (int i = 0; i < solution.allocations.size(); i++)
+    {
+        auto it = solution.allocations.begin() + i;
+
+        if (solution.allocations[i].event_id == e)
+        {
+            solution.allocations.erase(it);
+            i--;
+        }
+    }
+
+    solution.event_allocations.erase(e);
+    solution.teacher_schedule.erase(e);
+    solution.event_day_counts.erase(e);
+    solution.event_double_lessons.erase(e);
+    solution.allocated_duration.erase(e);
+}
+
+pair<Solution, vector<string>> destroy(Solution solution, int destruction_rate)
+{
+    vector<string> events_to_destroy = select_events(solution, destruction_rate);
+
+    for (const auto &e : events_to_destroy)
+        remove_allocations(e, solution);
+
+    return {solution, events_to_destroy};
+}
+
+/*
+FUNÇÃO alocar_evento_guloso(evento, S, instância)
+    // Tenta alocar aulas duplas primeiro
+    ENQUANTO duração_restante(evento) >= 2 FAÇA
+        t = encontrar_melhor_horario(evento, duração=2, S, instância)
+        SE t != NULO ENTÃO
+            alocar(evento, t, duração=2)
+        SENÃO
+            INTERROMPER
+        FIM SE
+    FIM ENQUANTO
+
+    // Tenta alocar aulas simples
+    ENQUANTO duração_restante(evento) > 0 FAÇA
+        t = encontrar_melhor_horario(evento, duração=1, S, instância)
+        SE t != NULO ENTÃO
+            alocar(evento, t, duração=1)
+        SENÃO
+            // Marcar como não alocado
+            alocar(evento, "UNALLOCATED", duração_restante)
+        FIM SE
+    FIM ENQUANTO
+FIM FUNÇÃO*/
+
+void greedy_event_allocation(string e, Solution &solution, Instance &instance)
+{
+    // passar o que deve ser alocado
+    // usar a mesma lógica do greedy atual para tentar alocar: nao violar nenhuma restrição
+    // se possível tentar evitar as softs
+    // trocar e avaliar para ver o impacto
+
+    // se der tentar fazer a destruição de forma gulosa em vez de aleatoria
+}
+
+Solution rebuild(Solution solution, vector<string> &destroyed, Instance &instance)
+{
+    // Ordenar eventos destruídos por duração total (decrescente)
+    sort(destroyed.begin(), destroyed.end(),
+         [&](const string &a, const string &b)
+         {
+             const EventInfo &eventA = instance.events[instance.event_index.at(a)];
+             const EventInfo &eventB = instance.events[instance.event_index.at(b)];
+             return eventA.total_duration > eventB.total_duration;
+         });
+
+    for (const string &e : destroyed)
+        greedy_event_allocation(e, solution, instance);
+
+    return solution;
+}
+
+Solution iterated_greedy(Instance &instance, int max_iters, int destruction_rate)
+{
+    Solution init = generate_greedy(instance);
+    Solution best_solution = init;
+
+    for (int i = 0; i < max_iters; i++)
+    {
+        auto result = destroy(init, destruction_rate);
+
+        Solution partial_solution = result.first;
+        vector<string> destroyed_events = result.second;
+
+        Solution new_solution = rebuild(partial_solution, destroyed_events, instance);
+    }
+
+    // provisorio
+    return init;
+}
+
 int main()
 {
     Instance instance;
     instance.load("../instances/instance1.xml");
 
     // vector<Solution> solutions = load_solutions_from_xml("../instances/original/instance1_sol.xml", instance);
-
     // for (size_t i = 0; i < solutions.size(); ++i)
     // {
     //     cout << "\n=== Avaliando solução " << i + 1 << " ===" << endl;
@@ -864,11 +1020,63 @@ int main()
     //     evaluator.print_report();
     // }
 
-    Solution init = generateGreedy(instance, 100);
-
+    Solution init = generate_greedy(instance, 100);
     Evaluator ev;
     ev.evaluate(instance, init);
     ev.print_report();
+
+    // for (auto t : init.allocations)
+    //     cout << t.event_id << " " << t.time_id << " " << t.duration << endl;
+
+    // for (auto t : init.event_allocations)
+    //     cout << t.first << endl;
+
+    // cout << init.event_allocations.size() << endl;
+
+    cout << "teacher_schedule" << endl;
+    int count = 0;
+    for (const auto &t : init.teacher_schedule)
+    {
+        if (count++ >= 5)
+            break;
+        cout << t.first << endl;
+    }
+
+    cout << "class_schedule" << endl;
+    count = 0;
+    for (const auto &t : init.class_schedule)
+    {
+        if (count++ >= 5)
+            break;
+        cout << t.first << endl;
+    }
+
+    cout << "event_day_counts" << endl;
+    count = 0;
+    for (const auto &t : init.event_day_counts)
+    {
+        if (count++ >= 5)
+            break;
+        cout << t.first << " " << t.second.begin()->first << endl;
+    }
+
+    cout << "event_double_lessons" << endl;
+    count = 0;
+    for (const auto &t : init.event_double_lessons)
+    {
+        if (count++ >= 5)
+            break;
+        cout << t.first << endl;
+    }
+
+    cout << "allocated_duration" << endl;
+    count = 0;
+    for (const auto &t : init.allocated_duration)
+    {
+        if (count++ >= 5)
+            break;
+        cout << t.first << endl;
+    }
 
     return 0;
 }
