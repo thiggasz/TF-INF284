@@ -8,11 +8,12 @@
 #include <set>
 #include <string>
 #include <sstream>
+#include <chrono>
+#include <random>
 
 using namespace tinyxml2;
 using namespace std;
 
-// Estruturas de dados para a instância
 struct TimeInfo
 {
     string id;
@@ -63,7 +64,6 @@ public:
     unordered_map<string, int> time_index;
     unordered_map<string, int> event_index;
     unordered_map<string, string> teacher_name;
-    unordered_map<string, string> className;
 
     unordered_map<string, unordered_set<string>> teacher_unavailable_times;
     unordered_map<string, pair<int, int>> course_split_constraints;
@@ -171,10 +171,6 @@ void Instance::load(const string &filename)
         if (r.type == "Teacher")
         {
             teacher_name[r.id] = r.name;
-        }
-        else if (r.type == "Class")
-        {
-            className[r.id] = r.name;
         }
     }
 
@@ -406,7 +402,7 @@ void Evaluator::evaluate(const Instance &instance, const Solution &solution)
 
 void Evaluator::check_hard_constraints(const Instance &instance, const Solution &solution)
 {
-    // 1. Verificar se todos os eventos foram completamente alocados
+    // AssignTimeConstraint
     for (const auto &event : instance.events)
     {
         int allocated = 0;
@@ -423,7 +419,7 @@ void Evaluator::check_hard_constraints(const Instance &instance, const Solution 
         }
     }
 
-    // 2. Verificar conflitos de recursos
+    // AvoidClashesConstraint
     unordered_map<string, set<string>> teacher_allocations;
     unordered_map<string, set<string>> class_allocations;
 
@@ -456,7 +452,7 @@ void Evaluator::check_hard_constraints(const Instance &instance, const Solution 
         class_allocations[alloc.time_id].insert(event.class_id);
     }
 
-    // 3. Verificar horários proibidos
+    // AvoidUnavailableTimesConstraint
     for (const Allocation &alloc : solution.allocations)
     {
         const EventInfo &event = instance.events.at(instance.event_index.at(alloc.event_id));
@@ -476,7 +472,7 @@ void Evaluator::check_hard_constraints(const Instance &instance, const Solution 
         }
     }
 
-    // 4. Verificar limite de aulas por dia por evento
+    // SpreadEventsConstraint
     for (const auto &event : instance.events)
     {
         if (solution.event_day_counts.find(event.id) != solution.event_day_counts.end())
@@ -496,7 +492,7 @@ void Evaluator::check_hard_constraints(const Instance &instance, const Solution 
 
 void Evaluator::check_soft_constraints(const Instance &instance, const Solution &solution)
 {
-    // 1. Verificar restrições de divisão de aulas
+    // DistributeSplitEventsConstraint
     for (const auto &event : instance.events)
     {
         if (instance.course_split_constraints.find(event.course_id) !=
@@ -516,7 +512,7 @@ void Evaluator::check_soft_constraints(const Instance &instance, const Solution 
             if (actual_double < min_double || actual_double > max_double)
             {
                 soft_violations++;
-                int cost = 1; // Valor padrão
+                int cost = 1;
                 for (const auto &c : instance.constraints)
                 {
                     if (c.type == "DistributeSplitEventsConstraint" &&
@@ -533,7 +529,7 @@ void Evaluator::check_soft_constraints(const Instance &instance, const Solution 
         }
     }
 
-    // 2. Verificar dias de trabalho dos professores
+    // ClusterBusyTimesConstraint
     for (const auto &teacher : instance.teacher_name)
     {
         const string &teacher_id = teacher.first;
@@ -551,7 +547,7 @@ void Evaluator::check_soft_constraints(const Instance &instance, const Solution 
             if (actual_days > max_days)
             {
                 soft_violations++;
-                int cost = 1; // Valor padrão
+                int cost = 1;
                 for (const auto &c : instance.constraints)
                 {
                     if (c.type == "ClusterBusyTimesConstraint" &&
@@ -568,7 +564,7 @@ void Evaluator::check_soft_constraints(const Instance &instance, const Solution 
         }
     }
 
-    // 3. Verificar janelas livres entre aulas
+    // LimitIdleTimesConstraint
     for (const auto &teacher_sched : solution.teacher_schedule)
     {
         const string &teacher_id = teacher_sched.first;
@@ -596,7 +592,7 @@ void Evaluator::check_soft_constraints(const Instance &instance, const Solution 
                 if (slots[i] - slots[i - 1] > 1)
                 {
                     soft_violations++;
-                    int cost = 1; // Valor padrão
+                    int cost = 1;
                     for (const auto &c : instance.constraints)
                     {
                         if (c.type == "LimitIdleTimesConstraint")
@@ -624,50 +620,59 @@ void Evaluator::print_report() const
     cout << (hard_violations == 0 ? "SOLUÇÃO VÁLIDA" : "SOLUÇÃO INVÁLIDA") << endl;
 }
 
-// Função para carregar solução do XML
-vector<Solution> load_solutions_from_xml(const string &filename, const Instance &instance) {
+vector<Solution> load_solutions_from_xml(const string &filename, const Instance &instance)
+{
     XMLDocument doc;
     vector<Solution> solutions;
 
-    if (doc.LoadFile(filename.c_str()) != XML_SUCCESS) {
+    if (doc.LoadFile(filename.c_str()) != XML_SUCCESS)
+    {
         cerr << "Erro ao carregar o arquivo XML: " << filename << endl;
         return solutions;
     }
 
     XMLElement *root = doc.FirstChildElement("HighSchoolTimetableArchive");
-    if (!root) return solutions;
+    if (!root)
+        return solutions;
 
     // Percorrer todos os grupos de solução
     XMLElement *solution_groups = root->FirstChildElement("SolutionGroups");
-    if (!solution_groups) return solutions;
+    if (!solution_groups)
+        return solutions;
 
-    for (XMLElement *group = solution_groups->FirstChildElement("SolutionGroup"); 
-         group; 
-         group = group->NextSiblingElement("SolutionGroup")) {
-        
+    for (XMLElement *group = solution_groups->FirstChildElement("SolutionGroup");
+         group;
+         group = group->NextSiblingElement("SolutionGroup"))
+    {
+
         // Percorrer todas as soluções dentro do grupo
-        for (XMLElement *solution_elem = group->FirstChildElement("Solution"); 
-             solution_elem; 
-             solution_elem = solution_elem->NextSiblingElement("Solution")) {
-            
+        for (XMLElement *solution_elem = group->FirstChildElement("Solution");
+             solution_elem;
+             solution_elem = solution_elem->NextSiblingElement("Solution"))
+        {
+
             Solution solution;
             XMLElement *events_elem = solution_elem->FirstChildElement("Events");
-            if (!events_elem) continue;
+            if (!events_elem)
+                continue;
 
-            for (XMLElement *event_elem = events_elem->FirstChildElement("Event"); 
-                 event_elem; 
-                 event_elem = event_elem->NextSiblingElement("Event")) {
-                
+            for (XMLElement *event_elem = events_elem->FirstChildElement("Event");
+                 event_elem;
+                 event_elem = event_elem->NextSiblingElement("Event"))
+            {
+
                 Allocation alloc;
                 alloc.event_id = event_elem->Attribute("Reference");
 
                 XMLElement *duration_elem = event_elem->FirstChildElement("Duration");
-                if (duration_elem && duration_elem->GetText()) {
+                if (duration_elem && duration_elem->GetText())
+                {
                     alloc.duration = atoi(duration_elem->GetText());
                 }
 
                 XMLElement *time_elem = event_elem->FirstChildElement("Time");
-                if (time_elem && time_elem->Attribute("Reference")) {
+                if (time_elem && time_elem->Attribute("Reference"))
+                {
                     alloc.time_id = time_elem->Attribute("Reference");
                 }
 
@@ -675,14 +680,16 @@ vector<Solution> load_solutions_from_xml(const string &filename, const Instance 
                 solution.event_allocations[alloc.event_id].push_back(alloc);
                 solution.allocated_duration[alloc.event_id] += alloc.duration;
 
-                if (instance.event_index.find(alloc.event_id) != instance.event_index.end()) {
+                if (instance.event_index.find(alloc.event_id) != instance.event_index.end())
+                {
                     const EventInfo &event = instance.events.at(instance.event_index.at(alloc.event_id));
                     const TimeInfo &t = instance.times.at(instance.time_index.at(alloc.time_id));
-                    
+
                     solution.event_day_counts[alloc.event_id][t.day]++;
                     solution.teacher_schedule[event.teacher_id].insert(t.day);
-                    
-                    if (alloc.duration == 2) {
+
+                    if (alloc.duration == 2)
+                    {
                         solution.event_double_lessons[alloc.event_id]++;
                     }
                 }
@@ -693,18 +700,175 @@ vector<Solution> load_solutions_from_xml(const string &filename, const Instance 
     return solutions;
 }
 
-int main() {
+Solution generateGreedy(const Instance &instance, int max_attempts = 100)
+{
+    Solution sol;
+    int attempt = 0;
+    bool complete_solution = false;
+
+    unordered_map<string, int> day_order = {{"Mo", 1}, {"Tu", 2}, {"We", 3}, {"Th", 4}, {"Fr", 5}};
+
+    unsigned seed = chrono::system_clock::now().time_since_epoch().count();
+    mt19937 rng(seed);
+
+    while (attempt < max_attempts && !complete_solution)
+    {
+        attempt++;
+        sol = Solution();
+        complete_solution = true;
+
+        unordered_map<string, set<string>> teacher_used;
+        unordered_map<string, set<string>> class_used;
+        unordered_map<string, set<string>> event_used_days;
+        unordered_map<string, int> remaining_duration;
+        for (const auto &e : instance.events)
+        {
+            remaining_duration[e.id] = e.total_duration;
+        }
+
+        vector<EventInfo> evs = instance.events;
+
+        shuffle(evs.begin(), evs.end(), rng);
+
+        sort(evs.begin(), evs.end(),
+             [](const EventInfo &a, const EventInfo &b)
+             {
+                 return a.total_duration > b.total_duration;
+             });
+
+        for (const auto &e : evs)
+        {
+
+            while (remaining_duration[e.id] >= 2)
+            {
+                bool allocated = false;
+
+                vector<TimeInfo> shuffled_times = instance.times;
+                shuffle(shuffled_times.begin(), shuffled_times.end(), rng);
+
+                for (const auto &t : shuffled_times)
+                {
+                    if (teacher_used[e.teacher_id].count(t.id))
+                        continue;
+                    if (class_used[e.class_id].count(t.id))
+                        continue;
+                    if (event_used_days[e.id].count(t.day))
+                        continue;
+                    if (t.max_duration < 2)
+                        continue;
+                    if (instance.teacher_unavailable_times.count(e.teacher_id) &&
+                        instance.teacher_unavailable_times.at(e.teacher_id).count(t.id))
+                        continue;
+
+                    Allocation alloc;
+                    alloc.event_id = e.id;
+                    alloc.time_id = t.id;
+                    alloc.duration = 2;
+
+                    sol.allocations.push_back(alloc);
+                    sol.event_allocations[e.id].push_back(alloc);
+                    sol.allocated_duration[e.id] += 2;
+                    sol.event_day_counts[e.id][t.day]++;
+                    sol.event_double_lessons[e.id]++;
+                    sol.teacher_schedule[e.teacher_id].insert(t.day);
+                    sol.class_schedule[e.class_id].insert(t.day);
+
+                    teacher_used[e.teacher_id].insert(t.id);
+                    class_used[e.class_id].insert(t.id);
+                    event_used_days[e.id].insert(t.day);
+                    remaining_duration[e.id] -= 2;
+                    allocated = true;
+                 
+                    break;
+                }
+
+                if (!allocated)
+                    break;
+            }
+
+            while (remaining_duration[e.id] > 0)
+            {
+                bool allocated = false;
+                vector<TimeInfo> shuffled_times = instance.times;
+                shuffle(shuffled_times.begin(), shuffled_times.end(), rng);
+
+                for (const auto &t : shuffled_times)
+                {
+                    if (teacher_used[e.teacher_id].count(t.id))
+                        continue;
+                    if (class_used[e.class_id].count(t.id))
+                        continue;
+                    if (event_used_days[e.id].count(t.day))
+                        continue;
+                    if (instance.teacher_unavailable_times.count(e.teacher_id) &&
+                        instance.teacher_unavailable_times.at(e.teacher_id).count(t.id))
+                        continue;
+
+                    Allocation alloc;
+                    alloc.event_id = e.id;
+                    alloc.time_id = t.id;
+                    alloc.duration = 1;
+
+                    sol.allocations.push_back(alloc);
+                    sol.event_allocations[e.id].push_back(alloc);
+                    sol.allocated_duration[e.id] += 1;
+                    sol.event_day_counts[e.id][t.day]++;
+                    sol.teacher_schedule[e.teacher_id].insert(t.day);
+                    sol.class_schedule[e.class_id].insert(t.day);
+
+                    teacher_used[e.teacher_id].insert(t.id);
+                    class_used[e.class_id].insert(t.id);
+                    event_used_days[e.id].insert(t.day);
+                    remaining_duration[e.id] -= 1;
+                    allocated = true;
+
+                    break;
+                }
+
+                if (!allocated)
+                    break;
+            }
+
+            if (remaining_duration[e.id] > 0)
+            {
+                complete_solution = false;
+
+                Allocation alloc;
+                alloc.event_id = e.id;
+                alloc.time_id = "UNALLOCATED";
+                alloc.duration = remaining_duration[e.id];
+                sol.allocations.push_back(alloc);
+                sol.event_allocations[e.id].push_back(alloc);
+            }
+        }
+
+        if (complete_solution)
+            break;
+    }
+
+    return sol;
+}
+
+int main()
+{
     Instance instance;
     instance.load("../instances/instance1.xml");
-    
-    vector<Solution> solutions = load_solutions_from_xml("../instances/original/instance1_sol.xml", instance);
-    
-    for (size_t i = 0; i < solutions.size(); ++i) {
-        cout << "\n=== Avaliando solução " << i+1 << " ===" << endl;
-        Evaluator evaluator;
-        evaluator.evaluate(instance, solutions[i]);
-        evaluator.print_report();
-    }
-    
+
+    // vector<Solution> solutions = load_solutions_from_xml("../instances/original/instance1_sol.xml", instance);
+
+    // for (size_t i = 0; i < solutions.size(); ++i)
+    // {
+    //     cout << "\n=== Avaliando solução " << i + 1 << " ===" << endl;
+    //     Evaluator evaluator;
+    //     evaluator.evaluate(instance, solutions[i]);
+    //     evaluator.print_report();
+    // }
+
+    Solution init = generateGreedy(instance, 100);
+
+    Evaluator ev;
+    ev.evaluate(instance, init);
+    ev.print_report();
+
     return 0;
 }
