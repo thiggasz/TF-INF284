@@ -23,7 +23,6 @@ vector<Solution> load_solutions_from_xml(const string &filename, const Instance 
     if (!root)
         return solutions;
 
-    // Percorrer todos os grupos de solução
     XMLElement *solution_groups = root->FirstChildElement("SolutionGroups");
     if (!solution_groups)
         return solutions;
@@ -32,8 +31,6 @@ vector<Solution> load_solutions_from_xml(const string &filename, const Instance 
          group;
          group = group->NextSiblingElement("SolutionGroup"))
     {
-
-        // Percorrer todas as soluções dentro do grupo
         for (XMLElement *solution_elem = group->FirstChildElement("Solution");
              solution_elem;
              solution_elem = solution_elem->NextSiblingElement("Solution"))
@@ -88,9 +85,11 @@ vector<Solution> load_solutions_from_xml(const string &filename, const Instance 
     return solutions;
 }
 
+
+
 int main()
 {
-    string path = "instances/instance7.xml";
+    string path = "instances/instance5.xml";
     Instance instance;
     instance.load(path);
 
@@ -98,6 +97,7 @@ int main()
     for (size_t i = 0; i < solutions.size(); ++i)
     {
         cout << "\n=== Avaliando solução " << i + 1 << " ===" << endl;
+        solutions[i].print(instance);
         Evaluator evaluator;
         evaluator.evaluate(instance, solutions[i]);
         evaluator.print_report();
@@ -113,23 +113,25 @@ int main()
     cout << "\n===Solução IG ===" << endl;
     IteratedGreedy iterated_greedy;
     Solution sol = iterated_greedy.solve(instance, 200, 0.4);
+    sol.print(instance);
+
     Evaluator ev_ig;
     ev_ig.evaluate(instance, sol);
     ev_ig.print_report();
 
     cout << "\n=== Melhor solução Bee Colony ===" << endl;
-    // Parâmetros do ABC
-    int population = 15;       // Tamanho da população
-    int limit = 50;    // Limite de tentativas antes do abandono
-    int max_cycles = 200; // Número máximo de ciclos
-    double destruction_rate = 0.15; // Taxa de destruição
+
+    int population = 15;      
+    int limit = 50;
+    int max_cycles = 200;
+    double destruction_rate = 0.15;
 
     BeeColony bee_colony(instance);
     bee_colony.solve(population, limit, max_cycles, destruction_rate);
     
     Solution best_solution = bee_colony.getBestSolution();
+    best_solution.print(instance);
 
-    // Avaliar a melhor solução
     Evaluator evaluator;
     evaluator.evaluate(instance, best_solution);
     evaluator.print_report();

@@ -22,7 +22,6 @@ Solution Greedy::generate_greedy(const Instance &instance, int max_attempts)
         sol = Solution(); // Reset
         complete_solution = true;
 
-        // Inicializar estruturas de ocupação (por horário)
         for (const auto &t : instance.times) {
             sol.teacher_occupation[t.id] = unordered_set<string>();
             sol.class_occupation[t.id] = unordered_set<string>();
@@ -67,7 +66,6 @@ Solution Greedy::generate_greedy(const Instance &instance, int max_attempts)
                         instance.teacher_unavailable_times.at(e.teacher_id).count(t.id))
                         continue;
 
-                    // Alocar
                     Allocation alloc;
                     alloc.event_id = e.id;
                     alloc.time_id = t.id;
@@ -80,7 +78,6 @@ Solution Greedy::generate_greedy(const Instance &instance, int max_attempts)
                     sol.event_double_lessons[e.id]++;
                     sol.teacher_schedule[e.teacher_id].insert(t.day);
                     sol.class_schedule[e.class_id].insert(t.day);
-                    // Atualizar estruturas de ocupação
                     sol.teacher_occupation[t.id].insert(e.teacher_id);
                     sol.class_occupation[t.id].insert(e.class_id);
 
@@ -124,7 +121,6 @@ Solution Greedy::generate_greedy(const Instance &instance, int max_attempts)
                     sol.event_day_counts[e.id][t.day]++;
                     sol.teacher_schedule[e.teacher_id].insert(t.day);
                     sol.class_schedule[e.class_id].insert(t.day);
-                    // Atualizar estruturas de ocupação
                     sol.teacher_occupation[t.id].insert(e.teacher_id);
                     sol.class_occupation[t.id].insert(e.class_id);
 
@@ -158,8 +154,12 @@ Solution Greedy::generate_greedy(const Instance &instance, int max_attempts)
 void Greedy::greedy_event_allocation(string event_id, Solution &solution, Instance &instance, bool record_bad) {
     const EventInfo &event = instance.events[instance.event_index.at(event_id)];
     int remaining = event.total_duration - solution.allocated_duration[event_id];
-    
-    // Funções auxiliares para verificar disponibilidade
+
+    if (instance.event_index.find(event_id) == instance.event_index.end()) {
+        cerr << "Evento inválido: " << event_id << endl;
+        return;
+    }
+
     auto is_teacher_free = [&](const string &time_id) {
         return solution.teacher_occupation[time_id].find(event.teacher_id) == 
                solution.teacher_occupation[time_id].end();
@@ -174,7 +174,6 @@ void Greedy::greedy_event_allocation(string event_id, Solution &solution, Instan
         return solution.event_day_counts[event_id][day] == 0;
     };
 
-    // Tenta alocar aulas duplas primeiro
     while (remaining >= 2) {
         bool allocated = false;
         vector<TimeInfo> shuffled_times = instance.times;
@@ -187,25 +186,21 @@ void Greedy::greedy_event_allocation(string event_id, Solution &solution, Instan
             if (!is_teacher_free(t.id)) continue;
             if (!is_class_free(t.id)) continue;
             if (!is_day_available(t.day)) continue;
-            
-            // Evitar horários marcados como problemáticos
+
             if (solution.bad_times[event_id].count(t.id)) {
                 continue;
             }
-            
-            // Verificar indisponibilidade do professor
+
             if (instance.teacher_unavailable_times.count(event.teacher_id) &&
                 instance.teacher_unavailable_times[event.teacher_id].count(t.id)) {
                 continue;
             }
 
-            // Criar alocação
             Allocation alloc;
             alloc.event_id = event_id;
             alloc.time_id = t.id;
             alloc.duration = 2;
 
-            // Atualizar estruturas da solução
             solution.allocations.push_back(alloc);
             solution.event_allocations[event_id].push_back(alloc);
             solution.allocated_duration[event_id] += 2;
@@ -223,7 +218,6 @@ void Greedy::greedy_event_allocation(string event_id, Solution &solution, Instan
         if (!allocated) break;
     }
 
-    // Tenta alocar aulas simples
     while (remaining > 0) {
         bool allocated = false;
         vector<TimeInfo> shuffled_times = instance.times;
@@ -236,24 +230,20 @@ void Greedy::greedy_event_allocation(string event_id, Solution &solution, Instan
             if (!is_class_free(t.id)) continue;
             if (!is_day_available(t.day)) continue;
             
-            // Evitar horários marcados como problemáticos
             if (solution.bad_times[event_id].count(t.id)) {
                 continue;
             }
             
-            // Verificar indisponibilidade do professor
             if (instance.teacher_unavailable_times.count(event.teacher_id) &&
                 instance.teacher_unavailable_times[event.teacher_id].count(t.id)) {
                 continue;
             }
 
-            // Criar alocação
             Allocation alloc;
             alloc.event_id = event_id;
             alloc.time_id = t.id;
             alloc.duration = 1;
 
-            // Atualizar estruturas da solução
             solution.allocations.push_back(alloc);
             solution.event_allocations[event_id].push_back(alloc);
             solution.allocated_duration[event_id] += 1;
@@ -269,14 +259,12 @@ void Greedy::greedy_event_allocation(string event_id, Solution &solution, Instan
         }
         if (!allocated) {
             if (record_bad) {
-                // Registrar todos os horários tentados como problemáticos para este evento
                 for (const auto &t : shuffled_times) {
                     if (is_teacher_free(t.id) && is_class_free(t.id) && is_day_available(t.day)) {
                         solution.bad_times[event_id].insert(t.id);
                     }
                 }
             }
-            // Alocação de emergência (não alocado)
             Allocation alloc;
             alloc.event_id = event_id;
             alloc.time_id = "UNALLOCATED";

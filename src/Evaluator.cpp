@@ -37,9 +37,11 @@ void Evaluator::check_hard_constraints(const Instance &instance, const Solution 
 
     for (const Allocation &alloc : solution.allocations)
     {
+        if (alloc.time_id == "UNALLOCATED") 
+            continue;
+            
         const EventInfo &event = instance.events.at(instance.event_index.at(alloc.event_id));
 
-        // Verificar professor
         if (teacher_allocations.find(alloc.time_id) != teacher_allocations.end())
         {
             if (teacher_allocations[alloc.time_id].find(event.teacher_id) != teacher_allocations[alloc.time_id].end())
@@ -51,7 +53,6 @@ void Evaluator::check_hard_constraints(const Instance &instance, const Solution 
         }
         teacher_allocations[alloc.time_id].insert(event.teacher_id);
 
-        // Verificar turma
         if (class_allocations.find(alloc.time_id) != class_allocations.end())
         {
             if (class_allocations[alloc.time_id].find(event.class_id) != class_allocations[alloc.time_id].end())
@@ -67,6 +68,9 @@ void Evaluator::check_hard_constraints(const Instance &instance, const Solution 
     // AvoidUnavailableTimesConstraint
     for (const Allocation &alloc : solution.allocations)
     {
+        if (alloc.time_id == "UNALLOCATED") 
+            continue;
+
         const EventInfo &event = instance.events.at(instance.event_index.at(alloc.event_id));
 
         if (instance.teacher_unavailable_times.find(event.teacher_id) !=

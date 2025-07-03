@@ -10,21 +10,18 @@ vector<string> IteratedGreedy::select_events(const Solution& solution, const Ins
         const string& event_id = e.first;
         int cost = 0;
 
-        // Penalizar eventos não alocados
         if (solution.allocated_duration.at(event_id) < instance.events[instance.event_index.at(event_id)].total_duration) {
             cost += 1000;
         }
 
-        // Penalizar eventos em múltiplos dias (violação SpreadEventsConstraint)
         if (solution.event_day_counts.find(event_id) != solution.event_day_counts.end()) {
             for (const auto& day_count : solution.event_day_counts.at(event_id)) {
                 if (day_count.second > 1) {
-                    cost += 50; // Penalidade por dia com mais de uma aula
+                    cost += 50; 
                 }
             }
         }
 
-        // Penalizar se o número de aulas duplas não está dentro do exigido
         if (instance.course_split_constraints.find(instance.events[instance.event_index.at(event_id)].course_id) != instance.course_split_constraints.end()) {
             auto constraint = instance.course_split_constraints.at(instance.events[instance.event_index.at(event_id)].course_id);
             int min_double = constraint.first;
@@ -37,7 +34,6 @@ vector<string> IteratedGreedy::select_events(const Solution& solution, const Ins
         event_costs.push_back({event_id, cost});
     }
 
-    // Ordenar eventos por custo (maior primeiro)
     sort(event_costs.begin(), event_costs.end(), [](const pair<string, int>& a, const pair<string, int>& b) {
         return a.second > b.second;
     });
@@ -51,47 +47,41 @@ vector<string> IteratedGreedy::select_events(const Solution& solution, const Ins
 }
 
 void IteratedGreedy::remove_allocations(string event_id, Solution &solution, const Instance &instance) {
-    // Verificar se o evento existe na instância
     if (instance.event_index.find(event_id) == instance.event_index.end()) return;
     
     const EventInfo &event = instance.events.at(instance.event_index.at(event_id));
-    
-    // Remover todas as alocações deste evento
+
     auto it = solution.allocations.begin();
     while (it != solution.allocations.end()) {
         if (it->event_id == event_id) {
-            // Remover das estruturas de ocupação
             solution.teacher_occupation[it->time_id].erase(event.teacher_id);
             solution.class_occupation[it->time_id].erase(event.class_id);
-            
-            // Atualizar contagem de dias
+
             const TimeInfo &t = instance.times.at(instance.time_index.at(it->time_id));
             solution.event_day_counts[event_id][t.day]--;
             if (solution.event_day_counts[event_id][t.day] == 0) {
                 solution.event_day_counts[event_id].erase(t.day);
             }
-            
-            // Atualizar contagem de aulas duplas
+
             if (it->duration == 2) {
                 solution.event_double_lessons[event_id]--;
             }
-            
-            // Remover da lista principal
+
             it = solution.allocations.erase(it);
         } else {
             ++it;
         }
     }
-    
-    // Limpar estruturas específicas do evento
+
     solution.event_allocations.erase(event_id);
     solution.allocated_duration.erase(event_id);
-    
-    // Verificar e atualizar horários de professores
+
     set<string> days_to_remove;
     for (const auto& day : solution.teacher_schedule[event.teacher_id]) {
         bool has_other_allocations = false;
         for (const Allocation &alloc : solution.allocations) {
+            if (alloc.time_id == "UNALLOCATED") 
+                continue; 
             const EventInfo &e = instance.events.at(instance.event_index.at(alloc.event_id));
             if (e.teacher_id == event.teacher_id) {
                 const TimeInfo &t = instance.times.at(instance.time_index.at(alloc.time_id));
@@ -112,11 +102,12 @@ void IteratedGreedy::remove_allocations(string event_id, Solution &solution, con
         solution.teacher_schedule.erase(event.teacher_id);
     }
     
-    // Verificar e atualizar horários de turmas
     days_to_remove.clear();
     for (const auto& day : solution.class_schedule[event.class_id]) {
         bool has_other_allocations = false;
         for (const Allocation &alloc : solution.allocations) {
+            if (alloc.time_id == "UNALLOCATED") 
+                continue; 
             const EventInfo &e = instance.events.at(instance.event_index.at(alloc.event_id));
             if (e.class_id == event.class_id) {
                 const TimeInfo &t = instance.times.at(instance.time_index.at(alloc.time_id));
@@ -136,8 +127,7 @@ void IteratedGreedy::remove_allocations(string event_id, Solution &solution, con
     if (solution.class_schedule[event.class_id].empty()) {
         solution.class_schedule.erase(event.class_id);
     }
-    
-    // Remover contadores zerados
+
     if (solution.event_day_counts.find(event_id) != solution.event_day_counts.end() && 
         solution.event_day_counts[event_id].empty()) {
         solution.event_day_counts.erase(event_id);
