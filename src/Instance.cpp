@@ -209,17 +209,17 @@ void Instance::load(const string &filename)
                     }
                 }
             }
+        }
 
-            // Horários
-            XMLElement *times = applies_to->FirstChildElement("Times");
-            if (times)
+         // Horários
+        XMLElement *times = constr_elem->FirstChildElement("Times");
+        if (times)
+        {
+            for (XMLElement *tm = times->FirstChildElement("Time"); tm; tm = tm->NextSiblingElement("Time"))
             {
-                for (XMLElement *tm = times->FirstChildElement("Time"); tm; tm = tm->NextSiblingElement("Time"))
+                if (tm->Attribute("Reference"))
                 {
-                    if (tm->Attribute("Reference"))
-                    {
-                        c.applies_to_times.insert(tm->Attribute("Reference"));
-                    }
+                    c.applies_to_times.insert(tm->Attribute("Reference"));
                 }
             }
         }
@@ -276,10 +276,34 @@ void Instance::load(const string &filename)
                 for (const string &time_id : c.applies_to_times)
                 {
                     teacher_unavailable_times[teacher_id].insert(time_id);
+
+                    // cout << "---------- START DEBUG ----------" << endl;
+                    // cout << "teacher_id: " << teacher_id << endl;
+                    // cout << "time_id: " << time_id << endl;
+                    // cout << "---------- END DEBUG ----------" << endl;
+
                 }
             }
         }
 
         constraints.push_back(c);
     }
+    
+    unordered_map<string, vector<TimeInfo>> times_by_day;
+    for (const TimeInfo &t : times) {
+        times_by_day[t.day].push_back(t);
+    }
+
+    for (auto &pair : times_by_day) {
+        vector<TimeInfo> &times_in_day = pair.second;
+        sort(times_in_day.begin(), times_in_day.end(), 
+            [](const TimeInfo &a, const TimeInfo &b) { 
+                return a.slot < b.slot; 
+            });
+
+        for (int i = 0; i < (int)times_in_day.size() - 1; i++) {
+            next_time[times_in_day[i].id] = times_in_day[i+1].id;
+        }
+    }
+
 }

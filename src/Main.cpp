@@ -85,56 +85,109 @@ vector<Solution> load_solutions_from_xml(const string &filename, const Instance 
     return solutions;
 }
 
+#include <vector>
+#include <string>
+#include <ctime>
+#include <iomanip>
+#include <sstream>
 
+std::string solutionToXML(
+    const std::vector<Allocation>& allocations,
+    const std::string& instanceId = "BrazilInstance1_XHSTT-v2014"
+) {
+    // Gerar data atual no formato "December 2011"
+    auto t = std::time(nullptr);
+    auto tm = *std::localtime(&t);
+    std::ostringstream dateStream;
+    dateStream << std::put_time(&tm, "%B %Y");
+    std::string currentDate = dateStream.str();
+
+    // Início do documento XML
+    std::string xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+    xml += "<HighSchoolTimetableArchive>\n";
+    xml += "  <SolutionGroups>\n";
+    xml += "    <SolutionGroup Id=\"GeneratedSolution\">\n";
+    xml += "      <MetaData>\n";
+    xml += "        <Contributor>Automated Solution Generator</Contributor>\n";
+    xml += "        <Date>" + currentDate + "</Date>\n";
+    xml += "        <Description>Solution generated programmatically</Description>\n";
+    xml += "      </MetaData>\n";
+    xml += "      <Solution Reference=\"" + instanceId + "\">\n";
+    xml += "        <Events>\n";
+
+    // Adicionar cada alocação como evento
+    for (const auto& alloc : allocations) {
+        xml += "          <Event Reference=\"" + alloc.event_id + "\">\n";
+        xml += "            <Duration>" + std::to_string(alloc.duration) + "</Duration>\n";
+        xml += "            <Time Reference=\"" + alloc.time_id + "\"/>\n";
+        xml += "          </Event>\n";
+    }
+
+    // Fechar tags do XML
+    xml += "        </Events>\n";
+    xml += "      </Solution>\n";
+    xml += "    </SolutionGroup>\n";
+    xml += "  </SolutionGroups>\n";
+    xml += "</HighSchoolTimetableArchive>";
+
+    return xml;
+}
 
 int main()
 {
-    string path = "instances/instance5.xml";
+    string path = "instances/instance1.xml";
     Instance instance;
     instance.load(path);
 
     vector<Solution> solutions = load_solutions_from_xml(path, instance);
     for (size_t i = 0; i < solutions.size(); ++i)
     {
-        cout << "\n=== Avaliando solução " << i + 1 << " ===" << endl;
-        solutions[i].print(instance);
+        // cout << "\n=== Avaliando solução " << i + 1 << " ===" << endl;
+        // solutions[i].print(instance);
         Evaluator evaluator;
         evaluator.evaluate(instance, solutions[i]);
-        evaluator.print_report();
+        // evaluator.print_report();
     }
 
     cout << "\n===Solução gulosa ===" << endl;
     Greedy greedy;
-    Solution init = greedy.generate_greedy(instance, 100);
+    Solution init = greedy.generate_greedy(instance);
     Evaluator ev_g;
     ev_g.evaluate(instance, init);
     ev_g.print_report();
+    init.print(instance);
 
-    cout << "\n===Solução IG ===" << endl;
-    IteratedGreedy iterated_greedy;
-    Solution sol = iterated_greedy.solve(instance, 200, 0.4);
-    sol.print(instance);
+    std::string xmlSolution = solutionToXML(init.allocations);
+    std::cout << xmlSolution << std::endl;
 
-    Evaluator ev_ig;
-    ev_ig.evaluate(instance, sol);
-    ev_ig.print_report();
+    // cout << "\n===Solução IG ===" << endl;
+    // IteratedGreedy iterated_greedy;
+    // Solution sol = iterated_greedy.solve(instance, 200, 0.4);
+    // sol.print(instance);
 
-    cout << "\n=== Melhor solução Bee Colony ===" << endl;
+    // Evaluator ev_ig;
+    // ev_ig.evaluate(instance, sol);
+    // ev_ig.print_report();
 
-    int population = 15;      
-    int limit = 50;
-    int max_cycles = 200;
-    double destruction_rate = 0.15;
+    // cout << "\n=== Melhor solução Bee Colony ===" << endl;
 
-    BeeColony bee_colony(instance);
-    bee_colony.solve(population, limit, max_cycles, destruction_rate);
+    // int population = 15;      
+    // int limit = 50;
+    // int max_cycles = 200;
+    // double destruction_rate = 0.15;
+
+    // BeeColony bee_colony(instance);
+    // bee_colony.solve(population, limit, max_cycles, destruction_rate);
     
-    Solution best_solution = bee_colony.getBestSolution();
-    best_solution.print(instance);
+    // Solution best_solution = bee_colony.getBestSolution();
+    // best_solution.print(instance);
 
-    Evaluator evaluator;
-    evaluator.evaluate(instance, best_solution);
-    evaluator.print_report();
+    // Evaluator evaluator;
+    // evaluator.evaluate(instance, best_solution);
+    // evaluator.print_report();
+
+    // std::string xmlSolution = solutionToXML(best_solution.allocations);
+    // std::cout << xmlSolution << std::endl;
 
     return 0;
 }

@@ -9,6 +9,7 @@
 
 #include <vector>
 #include <unordered_map>
+#include <algorithm>
 
 using namespace std;
 using namespace tinyxml2;
@@ -28,6 +29,7 @@ public:
     unordered_map<string, unordered_set<string>> teacher_unavailable_times;
     unordered_map<string, pair<int, int>> course_split_constraints;
     unordered_map<string, int> teacher_max_days;
+    unordered_map<string, string> next_time;
 
     void load(const string &filename);
 };

@@ -5,10 +5,9 @@
 #include <random>
 #include <algorithm>
 
-Solution Greedy::generate_greedy(const Instance &instance, int max_attempts)
+Solution Greedy::generate_greedy(const Instance &instance)
 {
     Solution sol;
-    int attempt = 0;
     bool complete_solution = false;
 
     unordered_map<string, int> day_order = {{"Mo", 1}, {"Tu", 2}, {"We", 3}, {"Th", 4}, {"Fr", 5}};
@@ -16,13 +15,13 @@ Solution Greedy::generate_greedy(const Instance &instance, int max_attempts)
     unsigned seed = chrono::system_clock::now().time_since_epoch().count();
     mt19937 rng(seed);
 
-    while (attempt < max_attempts && !complete_solution)
+    while (!complete_solution)
     {
-        attempt++;
-        sol = Solution(); // Reset
+        sol = Solution();
         complete_solution = true;
 
-        for (const auto &t : instance.times) {
+        for (const auto &t : instance.times)
+        {
             sol.teacher_occupation[t.id] = unordered_set<string>();
             sol.class_occupation[t.id] = unordered_set<string>();
         }
@@ -54,6 +53,13 @@ Solution Greedy::generate_greedy(const Instance &instance, int max_attempts)
 
                 for (const auto &t : shuffled_times)
                 {
+                    if (instance.next_time.find(t.id) == instance.next_time.end())
+                        continue;
+
+                    string next_id = instance.next_time.at(t.id);
+
+                    if (teacher_used[e.teacher_id].count(next_id) || class_used[e.class_id].count(next_id))
+                        continue;
                     if (t.max_duration < 2)
                         continue;
                     if (teacher_used[e.teacher_id].count(t.id))
@@ -79,10 +85,14 @@ Solution Greedy::generate_greedy(const Instance &instance, int max_attempts)
                     sol.teacher_schedule[e.teacher_id].insert(t.day);
                     sol.class_schedule[e.class_id].insert(t.day);
                     sol.teacher_occupation[t.id].insert(e.teacher_id);
+                    sol.teacher_occupation[next_id].insert(e.teacher_id);
                     sol.class_occupation[t.id].insert(e.class_id);
+                    sol.class_occupation[next_id].insert(e.class_id);
 
                     teacher_used[e.teacher_id].insert(t.id);
+                    teacher_used[e.teacher_id].insert(next_id);
                     class_used[e.class_id].insert(t.id);
+                    class_used[e.class_id].insert(next_id);
                     event_used_days[e.id].insert(t.day);
                     remaining_duration[e.id] -= 2;
                     allocated = true;
@@ -131,16 +141,20 @@ Solution Greedy::generate_greedy(const Instance &instance, int max_attempts)
                     allocated = true;
                     break;
                 }
-                if (!allocated)
-                {
+                // if (!allocated)
+                // {
+                //     complete_solution = false;
+                //     Allocation alloc;
+                //     alloc.event_id = e.id;
+                //     alloc.time_id = "UNALLOCATED";
+                //     alloc.duration = remaining_duration[e.id];
+                //     sol.allocations.push_back(alloc);
+                //     sol.event_allocations[e.id].push_back(alloc);
+                //     sol.allocated_duration[e.id] += remaining_duration[e.id];
+                //     break;
+                // }
+                if (!allocated){
                     complete_solution = false;
-                    Allocation alloc;
-                    alloc.event_id = e.id;
-                    alloc.time_id = "UNALLOCATED";
-                    alloc.duration = remaining_duration[e.id];
-                    sol.allocations.push_back(alloc);
-                    sol.event_allocations[e.id].push_back(alloc);
-                    sol.allocated_duration[e.id] += remaining_duration[e.id];
                     break;
                 }
             }
@@ -151,51 +165,86 @@ Solution Greedy::generate_greedy(const Instance &instance, int max_attempts)
     return sol;
 }
 
-void Greedy::greedy_event_allocation(string event_id, Solution &solution, Instance &instance, bool record_bad) {
-    const EventInfo &event = instance.events[instance.event_index.at(event_id)];
-    int remaining = event.total_duration - solution.allocated_duration[event_id];
+void Greedy::greedy_event_allocation(string event_id, Solution &solution, Instance &instance, bool record_bad)
+{
 
-    if (instance.event_index.find(event_id) == instance.event_index.end()) {
+    if (instance.event_index.find(event_id) == instance.event_index.end())
+    {
         cerr << "Evento inválido: " << event_id << endl;
         return;
     }
 
-    auto is_teacher_free = [&](const string &time_id) {
-        return solution.teacher_occupation[time_id].find(event.teacher_id) == 
+    const EventInfo &event = instance.events[instance.event_index.at(event_id)];
+    int remaining = event.total_duration - solution.allocated_duration[event_id];
+
+    auto is_teacher_free = [&](const string &time_id)
+    {
+        return solution.teacher_occupation[time_id].find(event.teacher_id) ==
                solution.teacher_occupation[time_id].end();
     };
-    
-    auto is_class_free = [&](const string &time_id) {
-        return solution.class_occupation[time_id].find(event.class_id) == 
+
+    auto is_class_free = [&](const string &time_id)
+    {
+        return solution.class_occupation[time_id].find(event.class_id) ==
                solution.class_occupation[time_id].end();
     };
 
-    auto is_day_available = [&](const string &day) {
+    auto is_day_available = [&](const string &day)
+    {
+        if (solution.event_day_counts.find(event_id) == solution.event_day_counts.end())
+            return true;
+
+        if (solution.event_day_counts[event_id].find(day) == solution.event_day_counts[event_id].end())
+            return true;
+
         return solution.event_day_counts[event_id][day] == 0;
     };
 
-    while (remaining >= 2) {
+    while (remaining >= 2)
+    {
         bool allocated = false;
         vector<TimeInfo> shuffled_times = instance.times;
         unsigned seed = chrono::system_clock::now().time_since_epoch().count();
         mt19937 rng(seed);
         shuffle(shuffled_times.begin(), shuffled_times.end(), rng);
 
-        for (const auto &t : shuffled_times) {
-            if (t.max_duration < 2) continue;
-            if (!is_teacher_free(t.id)) continue;
-            if (!is_class_free(t.id)) continue;
-            if (!is_day_available(t.day)) continue;
+        for (const auto &t : shuffled_times)
+        {
+            // 1. Verificar se existe próximo slot
+            if (instance.next_time.find(t.id) == instance.next_time.end())
+            {
+                continue;
+            }
+            string next_id = instance.next_time.at(t.id);
 
-            if (solution.bad_times[event_id].count(t.id)) {
+            // 2. Verificar disponibilidade em AMBOS os slots
+            if (!is_teacher_free(t.id) || !is_teacher_free(next_id) ||
+                !is_class_free(t.id) || !is_class_free(next_id))
+            {
+                continue;
+            }
+
+            if (t.max_duration < 2)
+                continue;
+            if (!is_teacher_free(t.id))
+                continue;
+            if (!is_class_free(t.id))
+                continue;
+            if (!is_day_available(t.day))
+                continue;
+
+            if (solution.bad_times[event_id].count(t.id))
+            {
                 continue;
             }
 
             if (instance.teacher_unavailable_times.count(event.teacher_id) &&
-                instance.teacher_unavailable_times[event.teacher_id].count(t.id)) {
+                instance.teacher_unavailable_times[event.teacher_id].count(t.id))
+            {
                 continue;
             }
 
+            // 3. Realizar alocação dupla
             Allocation alloc;
             alloc.event_id = event_id;
             alloc.time_id = t.id;
@@ -208,34 +257,46 @@ void Greedy::greedy_event_allocation(string event_id, Solution &solution, Instan
             solution.event_double_lessons[event_id]++;
             solution.teacher_schedule[event.teacher_id].insert(t.day);
             solution.class_schedule[event.class_id].insert(t.day);
+
+            // Marcar ocupação nos DOIS slots
             solution.teacher_occupation[t.id].insert(event.teacher_id);
+            solution.teacher_occupation[next_id].insert(event.teacher_id);
             solution.class_occupation[t.id].insert(event.class_id);
-            
+            solution.class_occupation[next_id].insert(event.class_id);
+
             remaining -= 2;
             allocated = true;
             break;
         }
-        if (!allocated) break;
+        if (!allocated)
+            break;
     }
 
-    while (remaining > 0) {
+    while (remaining > 0)
+    {
         bool allocated = false;
         vector<TimeInfo> shuffled_times = instance.times;
         unsigned seed = chrono::system_clock::now().time_since_epoch().count();
         mt19937 rng(seed);
         shuffle(shuffled_times.begin(), shuffled_times.end(), rng);
 
-        for (const auto &t : shuffled_times) {
-            if (!is_teacher_free(t.id)) continue;
-            if (!is_class_free(t.id)) continue;
-            if (!is_day_available(t.day)) continue;
-            
-            if (solution.bad_times[event_id].count(t.id)) {
+        for (const auto &t : shuffled_times)
+        {
+            if (!is_teacher_free(t.id))
+                continue;
+            if (!is_class_free(t.id))
+                continue;
+            if (!is_day_available(t.day))
+                continue;
+
+            if (solution.bad_times[event_id].count(t.id))
+            {
                 continue;
             }
-            
+
             if (instance.teacher_unavailable_times.count(event.teacher_id) &&
-                instance.teacher_unavailable_times[event.teacher_id].count(t.id)) {
+                instance.teacher_unavailable_times[event.teacher_id].count(t.id))
+            {
                 continue;
             }
 
@@ -252,15 +313,19 @@ void Greedy::greedy_event_allocation(string event_id, Solution &solution, Instan
             solution.class_schedule[event.class_id].insert(t.day);
             solution.teacher_occupation[t.id].insert(event.teacher_id);
             solution.class_occupation[t.id].insert(event.class_id);
-            
+
             remaining--;
             allocated = true;
             break;
         }
-        if (!allocated) {
-            if (record_bad) {
-                for (const auto &t : shuffled_times) {
-                    if (is_teacher_free(t.id) && is_class_free(t.id) && is_day_available(t.day)) {
+        if (!allocated)
+        {
+            if (record_bad)
+            {
+                for (const auto &t : shuffled_times)
+                {
+                    if (is_teacher_free(t.id) && is_class_free(t.id) && is_day_available(t.day))
+                    {
                         solution.bad_times[event_id].insert(t.id);
                     }
                 }
