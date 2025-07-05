@@ -166,9 +166,12 @@ Solution Greedy::generate_greedy(const Instance &instance)
 
 void Greedy::generate_greedy(vector<string> destroyed_events, Solution &solution, Instance &instance)
 {
+    Solution base_solution = solution;
+
     bool complete_solution = false;
+
     vector<EventInfo> to_realocate;
-    unordered_map<string, int> remaining_duration;
+    unordered_map<string, int> base_remaining_duration;
 
     unsigned seed = chrono::system_clock::now().time_since_epoch().count();
     mt19937 rng(seed);
@@ -177,7 +180,7 @@ void Greedy::generate_greedy(vector<string> destroyed_events, Solution &solution
     {
         const EventInfo event = instance.events[instance.event_index.at(id)];
         to_realocate.push_back(event);
-        remaining_duration[id] = event.total_duration - solution.allocated_duration[id];
+        base_remaining_duration[id] = event.total_duration - solution.allocated_duration[id];
     }
 
     auto is_teacher_free = [&](const string &time_id, const EventInfo &event)
@@ -203,7 +206,10 @@ void Greedy::generate_greedy(vector<string> destroyed_events, Solution &solution
 
     while (!complete_solution)
     {
+        solution = base_solution;
         complete_solution = true;
+
+        auto remaining_duration = base_remaining_duration;
 
         shuffle(to_realocate.begin(), to_realocate.end(), rng);
         sort(to_realocate.begin(), to_realocate.end(),

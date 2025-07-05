@@ -47,7 +47,6 @@ Solution BeeColony::perturb_solution(Solution sol)
     auto [new_sol, destroyed] = destroy_random(sol, destruction_rate);
 
     Greedy greedy;
-    IteratedGreedy ig;
 
     greedy.generate_greedy(destroyed, new_sol, instance);
 

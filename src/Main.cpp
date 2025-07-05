@@ -92,9 +92,9 @@ vector<Solution> load_solutions_from_xml(const string &filename, const Instance 
 #include <sstream>
 
 std::string solutionToXML(
-    const std::vector<Allocation>& allocations,
-    const std::string& instanceId = "BrazilInstance1_XHSTT-v2014"
-) {
+    const std::vector<Allocation> &allocations,
+    const std::string &instanceId = "BrazilInstance1_XHSTT-v2014")
+{
     // Gerar data atual no formato "December 2011"
     auto t = std::time(nullptr);
     auto tm = *std::localtime(&t);
@@ -116,7 +116,8 @@ std::string solutionToXML(
     xml += "        <Events>\n";
 
     // Adicionar cada alocação como evento
-    for (const auto& alloc : allocations) {
+    for (const auto &alloc : allocations)
+    {
         xml += "          <Event Reference=\"" + alloc.event_id + "\">\n";
         xml += "            <Duration>" + std::to_string(alloc.duration) + "</Duration>\n";
         xml += "            <Time Reference=\"" + alloc.time_id + "\"/>\n";
@@ -136,12 +137,16 @@ std::string solutionToXML(
 int main()
 {
     string path = "instances/instance1.xml";
+
     Instance instance;
     instance.load(path);
+
+    Evaluator evaluator;
 
     vector<Solution> solutions = load_solutions_from_xml(path, instance);
     for (size_t i = 0; i < solutions.size(); ++i)
     {
+        break;
         cout << "\n=== Avaliando solução " << i + 1 << " ===" << endl;
         solutions[i].print(instance);
         Evaluator evaluator;
@@ -149,41 +154,37 @@ int main()
         evaluator.print_report();
     }
 
-    cout << "\n===Solução gulosa ===" << endl;
-    Greedy greedy;
-    Solution init = greedy.generate_greedy(instance);
-    Evaluator ev_g;
-    ev_g.evaluate(instance, init);
-    ev_g.print_report();
-    init.print(instance);
+    // cout << "\n=== Solução gulosa ===" << endl;
+    // Greedy greedy;
+    // Solution initial_solution = greedy.generate_greedy(instance);
+    // initial_solution.print(instance);
+    // evaluator.evaluate(instance, initial_solution);
+    // evaluator.print_report();
 
-    cout << "\n===Solução IG ===" << endl;
+    // cout << "\n=== Solução por Iterated Greedy ===" << endl;
     IteratedGreedy iterated_greedy;
-    Solution sol = iterated_greedy.solve(instance, 200, 0.3);
-    sol.print(instance);
+    Solution iterated_greedy_solution = iterated_greedy.solve(instance, 200, 0.3);
+    // iterated_greedy_solution.print(instance);
+    // evaluator.evaluate(instance, iterated_greedy_solution);
+    // evaluator.print_report();
 
-    Evaluator ev_ig;
-    ev_ig.evaluate(instance, sol);
-    ev_ig.print_report();
+    // cout << "\n=== Melhor solução Bee Colony ===" << endl;
 
-    cout << "\n=== Melhor solução Bee Colony ===" << endl;
+    // int population = 15;
+    // int limit = 50;
+    // int max_cycles = 200;
+    // double destruction_rate = 0.15;
 
-    int population = 15;      
-    int limit = 50;
-    int max_cycles = 200;
-    double destruction_rate = 0.15;
+    // BeeColony bee_colony(instance);
+    // bee_colony.solve(population, limit, max_cycles, destruction_rate);
 
-    BeeColony bee_colony(instance);
-    bee_colony.solve(population, limit, max_cycles, destruction_rate);
-    
-    Solution best_solution = bee_colony.getBestSolution();
-    best_solution.print(instance);
+    // Solution bee_colony_solution = bee_colony.getBestSolution();
+    // bee_colony_solution.print(instance);
 
-    Evaluator evaluator;
-    evaluator.evaluate(instance, best_solution);
-    evaluator.print_report();
+    // evaluator.evaluate(instance, bee_colony_solution);
+    // evaluator.print_report();
 
-    std::string xmlSolution = solutionToXML(best_solution.allocations);
+    std::string xmlSolution = solutionToXML(iterated_greedy_solution.allocations);
     std::cout << xmlSolution << std::endl;
 
     return 0;
