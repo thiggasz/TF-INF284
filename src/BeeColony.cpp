@@ -46,38 +46,34 @@ Solution BeeColony::perturb_solution(Solution sol)
     int destruction_rate = max(1, (int)(instance.events.size() * this->destruction_rate));
     auto [new_sol, destroyed] = destroy_random(sol, destruction_rate);
 
-    sort(destroyed.begin(), destroyed.end(), [this](const string &a, const string &b)
-         {
-        const EventInfo& eventA = instance.events[instance.event_index.at(a)];
-        const EventInfo& eventB = instance.events[instance.event_index.at(b)];
-        return eventA.total_duration > eventB.total_duration; });
-
     Greedy greedy;
     IteratedGreedy ig;
 
-    for (const string &event_id : destroyed)
-    {
-        if (instance.event_index.find(event_id) == instance.event_index.end())
-            continue;
+    greedy.generate_greedy(destroyed, new_sol, instance);
 
-        int attempts = 0;
-        int max_attempts = 5;
-        int remaining = instance.events[instance.event_index.at(event_id)].total_duration;
+    // for (const string &event_id : destroyed)
+    // {
+    //     if (instance.event_index.find(event_id) == instance.event_index.end())
+    //         continue;
 
-        while (remaining > 0 && attempts < max_attempts)
-        {
-            greedy.greedy_event_allocation(event_id, new_sol, instance, false);
-            int allocated_after = new_sol.allocated_duration[event_id];
-            remaining = instance.events[instance.event_index.at(event_id)].total_duration - allocated_after;
+    //     int attempts = 0;
+    //     int max_attempts = 5; // rever
+    //     int remaining = instance.events[instance.event_index.at(event_id)].total_duration;
 
-            if (remaining > 0)
-            {
-                ig.remove_allocations(event_id, new_sol, instance);
-                remaining = instance.events[instance.event_index.at(event_id)].total_duration;
-            }
-            attempts++;
-        }
-    }
+    //     while (remaining > 0 && attempts < max_attempts)
+    //     {
+    //         greedy.generate_greedy(destroyed, new_sol, instance, false);
+    //         int allocated_after = new_sol.allocated_duration[event_id];
+    //         remaining = instance.events[instance.event_index.at(event_id)].total_duration - allocated_after;
+
+    //         if (remaining > 0)
+    //         {
+    //             ig.remove_allocations(event_id, new_sol, instance);
+    //             remaining = instance.events[instance.event_index.at(event_id)].total_duration;
+    //         }
+    //         attempts++;
+    //     }
+    // }
 
     return new_sol;
 }
@@ -208,7 +204,7 @@ void BeeColony::solve(int pop_size, int limit, int max_cycles, double destructio
 
         if (cycle % 10 == 0)
         {
-            // cout << "Ciclo " << cycle << ": Melhor custo = " << best_cost << endl;
+            cout << "Ciclo " << cycle << ": Melhor custo = " << best_cost << endl;
         }
     }
 }

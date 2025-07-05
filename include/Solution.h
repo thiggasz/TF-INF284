@@ -23,7 +23,7 @@ public:
     unordered_map<string, int> allocated_duration;
     unordered_map<string, unordered_set<string>> teacher_occupation; // time_id -> teacher_ids
     unordered_map<string, unordered_set<string>> class_occupation;   // time_id -> class_ids
-    unordered_map<string, unordered_set<string>> bad_times;
+    
     void print(const Instance& instance) const {
         std::cout << "\n=== Detalhes da Solução ===\n";
         std::cout << "Alocações:\n";

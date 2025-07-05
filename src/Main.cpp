@@ -142,11 +142,11 @@ int main()
     vector<Solution> solutions = load_solutions_from_xml(path, instance);
     for (size_t i = 0; i < solutions.size(); ++i)
     {
-        // cout << "\n=== Avaliando solução " << i + 1 << " ===" << endl;
-        // solutions[i].print(instance);
+        cout << "\n=== Avaliando solução " << i + 1 << " ===" << endl;
+        solutions[i].print(instance);
         Evaluator evaluator;
         evaluator.evaluate(instance, solutions[i]);
-        // evaluator.print_report();
+        evaluator.print_report();
     }
 
     cout << "\n===Solução gulosa ===" << endl;
@@ -157,37 +157,34 @@ int main()
     ev_g.print_report();
     init.print(instance);
 
-    std::string xmlSolution = solutionToXML(init.allocations);
-    std::cout << xmlSolution << std::endl;
+    cout << "\n===Solução IG ===" << endl;
+    IteratedGreedy iterated_greedy;
+    Solution sol = iterated_greedy.solve(instance, 200, 0.3);
+    sol.print(instance);
 
-    // cout << "\n===Solução IG ===" << endl;
-    // IteratedGreedy iterated_greedy;
-    // Solution sol = iterated_greedy.solve(instance, 200, 0.4);
-    // sol.print(instance);
+    Evaluator ev_ig;
+    ev_ig.evaluate(instance, sol);
+    ev_ig.print_report();
 
-    // Evaluator ev_ig;
-    // ev_ig.evaluate(instance, sol);
-    // ev_ig.print_report();
+    cout << "\n=== Melhor solução Bee Colony ===" << endl;
 
-    // cout << "\n=== Melhor solução Bee Colony ===" << endl;
+    int population = 15;      
+    int limit = 50;
+    int max_cycles = 200;
+    double destruction_rate = 0.15;
 
-    // int population = 15;      
-    // int limit = 50;
-    // int max_cycles = 200;
-    // double destruction_rate = 0.15;
-
-    // BeeColony bee_colony(instance);
-    // bee_colony.solve(population, limit, max_cycles, destruction_rate);
+    BeeColony bee_colony(instance);
+    bee_colony.solve(population, limit, max_cycles, destruction_rate);
     
-    // Solution best_solution = bee_colony.getBestSolution();
-    // best_solution.print(instance);
+    Solution best_solution = bee_colony.getBestSolution();
+    best_solution.print(instance);
 
-    // Evaluator evaluator;
-    // evaluator.evaluate(instance, best_solution);
-    // evaluator.print_report();
+    Evaluator evaluator;
+    evaluator.evaluate(instance, best_solution);
+    evaluator.print_report();
 
-    // std::string xmlSolution = solutionToXML(best_solution.allocations);
-    // std::cout << xmlSolution << std::endl;
+    std::string xmlSolution = solutionToXML(best_solution.allocations);
+    std::cout << xmlSolution << std::endl;
 
     return 0;
 }

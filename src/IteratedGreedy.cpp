@@ -67,44 +67,42 @@ void IteratedGreedy::remove_allocations(string event_id, Solution &solution, con
     {
         if (it->event_id == event_id)
         {
-            if (it->time_id != "UNALLOCATED")
+            solution.teacher_occupation[it->time_id].erase(event.teacher_id);
+            solution.class_occupation[it->time_id].erase(event.class_id);
+
+            if (solution.event_day_counts.find(event_id) != solution.event_day_counts.end())
             {
-                solution.teacher_occupation[it->time_id].erase(event.teacher_id);
-                solution.class_occupation[it->time_id].erase(event.class_id);
-
-                if (solution.event_day_counts.find(event_id) != solution.event_day_counts.end())
+                const TimeInfo &t = instance.times.at(instance.time_index.at(it->time_id));
+                auto &day_map = solution.event_day_counts[event_id];
+                if (day_map.find(t.day) != day_map.end())
                 {
-                    const TimeInfo &t = instance.times.at(instance.time_index.at(it->time_id));
-                    auto &day_map = solution.event_day_counts[event_id];
-                    if (day_map.find(t.day) != day_map.end())
+                    day_map[t.day]--;
+                    if (day_map[t.day] == 0)
                     {
-                        day_map[t.day]--;
-                        if (day_map[t.day] == 0)
-                        {
-                            day_map.erase(t.day);
-                        }
-                    }
-                }
-
-                if (it->duration == 2)
-                {
-                    if (instance.next_time.find(it->time_id) != instance.next_time.end())
-                    {
-                        string next_id = instance.next_time.at(it->time_id);
-                        solution.teacher_occupation[next_id].erase(event.teacher_id);
-                        solution.class_occupation[next_id].erase(event.class_id);
-                    }
-
-                    if (solution.event_double_lessons.find(event_id) != solution.event_double_lessons.end())
-                    {
-                        solution.event_double_lessons[event_id]--;
-                        if (solution.event_double_lessons[event_id] == 0)
-                        {
-                            solution.event_double_lessons.erase(event_id);
-                        }
+                        day_map.erase(t.day);
                     }
                 }
             }
+
+            if (it->duration == 2)
+            {
+                if (instance.next_time.find(it->time_id) != instance.next_time.end())
+                {
+                    string next_id = instance.next_time.at(it->time_id);
+                    solution.teacher_occupation[next_id].erase(event.teacher_id);
+                    solution.class_occupation[next_id].erase(event.class_id);
+                }
+
+                if (solution.event_double_lessons.find(event_id) != solution.event_double_lessons.end())
+                {
+                    solution.event_double_lessons[event_id]--;
+                    if (solution.event_double_lessons[event_id] == 0)
+                    {
+                        solution.event_double_lessons.erase(event_id);
+                    }
+                }
+            }
+            
             it = solution.allocations.erase(it);
         }
         else
@@ -213,11 +211,8 @@ Solution IteratedGreedy::rebuild(Solution solution, vector<string> &destroyed, I
                   instance.events[instance.event_index.at(b)].total_duration; });
 
     Greedy greedy;
+    greedy.generate_greedy(destroyed, solution, instance); 
 
-    for (const string &e : destroyed)
-    {
-        greedy.greedy_event_allocation(e, solution, instance, true); // Ativa o registro de horários problemáticos
-    }
     return solution;
 }
 
