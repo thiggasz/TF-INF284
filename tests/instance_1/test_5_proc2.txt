@@ -1,0 +1,48 @@
+instances/instance1.xml
+
+=== Solução por Greedy ===
+
+=== RELATÓRIO DE AVALIAÇÃO ===
+Violações HARD: 0
+Violações SOFT: 29
+Custo total: 127
+SOLUÇÃO VÁLIDA
+Solução por Greedy - Tempo de execução: 7 milissegundos
+
+=== Solução por Iterated Greedy ===
+
+=== RELATÓRIO DE AVALIAÇÃO ===
+Violações HARD: 0
+Violações SOFT: 22
+Custo total: 102
+SOLUÇÃO VÁLIDA
+Solução por Iterated Greedy - Tempo de execução: 88 milissegundos
+
+=== Solução por Artificial Bee Colony ===
+Ciclo 0: Melhor custo = 110
+Ciclo 10: Melhor custo = 110
+Ciclo 20: Melhor custo = 110
+Ciclo 30: Melhor custo = 110
+Ciclo 40: Melhor custo = 110
+Ciclo 50: Melhor custo = 108
+Ciclo 60: Melhor custo = 108
+Ciclo 70: Melhor custo = 108
+Ciclo 80: Melhor custo = 108
+Ciclo 90: Melhor custo = 108
+Ciclo 100: Melhor custo = 108
+Ciclo 110: Melhor custo = 108
+Ciclo 120: Melhor custo = 108
+Ciclo 130: Melhor custo = 108
+Ciclo 140: Melhor custo = 108
+Ciclo 150: Melhor custo = 108
+Ciclo 160: Melhor custo = 98
+Ciclo 170: Melhor custo = 98
+Ciclo 180: Melhor custo = 98
+Ciclo 190: Melhor custo = 98
+Solução por Artificial Bee Colony - Tempo de execução: 2293 milissegundos
+
+=== RELATÓRIO DE AVALIAÇÃO ===
+Violações HARD: 0
+Violações SOFT: 22
+Custo total: 98
+SOLUÇÃO VÁLIDA

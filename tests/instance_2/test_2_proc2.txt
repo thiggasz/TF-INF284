@@ -1,0 +1,136 @@
+instances/instance2.xml
+
+=== Solução por Greedy ===
+
+=== RELATÓRIO DE AVALIAÇÃO ===
+Violações HARD: 0
+Violações SOFT: 57
+Custo total: 223
+SOLUÇÃO VÁLIDA
+Solução por Greedy - Tempo de execução: 35 milissegundos
+
+=== Solução por Iterated Greedy ===
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+
+=== RELATÓRIO DE AVALIAÇÃO ===
+Violações HARD: 0
+Violações SOFT: 41
+Custo total: 173
+SOLUÇÃO VÁLIDA
+Solução por Iterated Greedy - Tempo de execução: 3071 milissegundos
+
+=== Solução por Artificial Bee Colony ===
+Ciclo 0: Melhor custo = 200
+Ciclo 10: Melhor custo = 200
+Ciclo 20: Melhor custo = 197
+Ciclo 30: Melhor custo = 197
+Ciclo 40: Melhor custo = 197
+Ciclo 50: Melhor custo = 197
+Ciclo 60: Melhor custo = 197
+Ciclo 70: Melhor custo = 197
+Ciclo 80: Melhor custo = 197
+Ciclo 90: Melhor custo = 197
+Ciclo 100: Melhor custo = 196
+Ciclo 110: Melhor custo = 196
+Ciclo 120: Melhor custo = 196
+Ciclo 130: Melhor custo = 193
+Ciclo 140: Melhor custo = 193
+Ciclo 150: Melhor custo = 193
+Ciclo 160: Melhor custo = 193
+Ciclo 170: Melhor custo = 193
+Ciclo 180: Melhor custo = 193
+Ciclo 190: Melhor custo = 193
+Solução por Artificial Bee Colony - Tempo de execução: 23831 milissegundos
+
+=== RELATÓRIO DE AVALIAÇÃO ===
+Violações HARD: 0
+Violações SOFT: 49
+Custo total: 193
+SOLUÇÃO VÁLIDA

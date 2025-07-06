@@ -1,0 +1,198 @@
+instances/instance3.xml
+
+=== Solução por Greedy ===
+
+=== RELATÓRIO DE AVALIAÇÃO ===
+Violações HARD: 0
+Violações SOFT: 68
+Custo total: 280
+SOLUÇÃO VÁLIDA
+Solução por Greedy - Tempo de execução: 8315 milissegundos
+
+=== Solução por Iterated Greedy ===
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+
+=== RELATÓRIO DE AVALIAÇÃO ===
+Violações HARD: 0
+Violações SOFT: 69
+Custo total: 275
+SOLUÇÃO VÁLIDA
+Solução por Iterated Greedy - Tempo de execução: 158418 milissegundos
+
+=== Solução por Artificial Bee Colony ===
+Ciclo 0: Melhor custo = 266
+Ciclo 10: Melhor custo = 266
+Ciclo 20: Melhor custo = 266
+Ciclo 30: Melhor custo = 266
+Ciclo 40: Melhor custo = 262
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Ciclo 50: Melhor custo = 259
+Ciclo 60: Melhor custo = 259
+Ciclo 70: Melhor custo = 259
+Ciclo 80: Melhor custo = 259
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Ciclo 90: Melhor custo = 259
+Alcançou o número máximo de iterações!
+Solução por Artificial Bee Colony - Tempo de execução: 2182765 milissegundos
+
+=== RELATÓRIO DE AVALIAÇÃO ===
+Violações HARD: 0
+Violações SOFT: 67
+Custo total: 259
+SOLUÇÃO VÁLIDA

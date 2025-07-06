@@ -1,0 +1,33 @@
+Comparação entre Greedy e Iterated Greedy usando o teste de Wilcoxon:
+
+Diferença: [10 10 15 30 25]
+IT_1: estatística=0.0000, p-valor=0.0625
+
+Diferença: [28 37 35 41 31]
+IT_2: estatística=0.0000, p-valor=0.0625
+
+Diferença: [34  5 20 14 20]
+IT_3: estatística=0.0000, p-valor=0.0625
+
+Comparação entre Greedy e Artificial Bee Colony usando o teste de Wilcoxon:
+
+Diferença: [12 15  6 22 29]
+IT_1: estatística=0.0000, p-valor=0.0625
+
+Diferença: [23 30 40 18 34]
+IT_2: estatística=0.0000, p-valor=0.0625
+
+Diferença: [47 21 35 17 28]
+IT_3: estatística=0.0000, p-valor=0.0625
+
+Comparação entre Iterated Greedy e Artificial Bee Colony usando o teste de Wilcoxon:
+
+Diferença: [ 2  5 -9 -8  4]
+IT_1: estatística=6.0000, p-valor=0.8125
+
+Diferença: [ -5  -7   5 -23   3]
+IT_2: estatística=3.5000, p-valor=0.3125
+
+Diferença: [13 16 15  3  8]
+IT_3: estatística=0.0000, p-valor=0.0625
+

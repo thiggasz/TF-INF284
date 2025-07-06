@@ -180,10 +180,10 @@ int main()
 
     cout << "\n=== Solução por Artificial Bee Colony ===" << endl;
 
-    int population = 15;
-    int limit = 50;
-    int max_cycles = 200;
-    double destruction_rate = 0.15;
+    int population = 10;
+    int limit = 30;
+    int max_cycles = 100;
+    double destruction_rate = 0.20;
 
     BeeColony bee_colony(instance);
 

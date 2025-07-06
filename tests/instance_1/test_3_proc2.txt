@@ -1,0 +1,68 @@
+instances/instance1.xml
+
+=== Solução por Greedy ===
+
+=== RELATÓRIO DE AVALIAÇÃO ===
+Violações HARD: 0
+Violações SOFT: 24
+Custo total: 114
+SOLUÇÃO VÁLIDA
+Solução por Greedy - Tempo de execução: 5 milissegundos
+
+=== Solução por Iterated Greedy ===
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+Alcançou o número máximo de iterações!
+
+=== RELATÓRIO DE AVALIAÇÃO ===
+Violações HARD: 0
+Violações SOFT: 19
+Custo total: 99
+SOLUÇÃO VÁLIDA
+Solução por Iterated Greedy - Tempo de execução: 208 milissegundos
+
+=== Solução por Artificial Bee Colony ===
+Ciclo 0: Melhor custo = 113
+Ciclo 10: Melhor custo = 113
+Ciclo 20: Melhor custo = 113
+Ciclo 30: Melhor custo = 113
+Ciclo 40: Melhor custo = 113
+Ciclo 50: Melhor custo = 111
+Ciclo 60: Melhor custo = 111
+Ciclo 70: Melhor custo = 111
+Ciclo 80: Melhor custo = 108
+Ciclo 90: Melhor custo = 108
+Ciclo 100: Melhor custo = 108
+Ciclo 110: Melhor custo = 108
+Ciclo 120: Melhor custo = 108
+Ciclo 130: Melhor custo = 108
+Ciclo 140: Melhor custo = 108
+Ciclo 150: Melhor custo = 108
+Ciclo 160: Melhor custo = 108
+Ciclo 170: Melhor custo = 108
+Ciclo 180: Melhor custo = 108
+Ciclo 190: Melhor custo = 108
+Solução por Artificial Bee Colony - Tempo de execução: 2339 milissegundos
+
+=== RELATÓRIO DE AVALIAÇÃO ===
+Violações HARD: 0
+Violações SOFT: 22
+Custo total: 108
+SOLUÇÃO VÁLIDA
