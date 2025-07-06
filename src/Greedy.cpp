@@ -28,10 +28,9 @@ Solution Greedy::generate_greedy(const Instance &instance)
         unordered_map<string, set<string>> class_used;
         unordered_map<string, set<string>> event_used_days;
         unordered_map<string, int> remaining_duration;
+
         for (const auto &e : instance.events)
-        {
             remaining_duration[e.id] = e.total_duration;
-        }
 
         vector<EventInfo> evs = instance.events;
         shuffle(evs.begin(), evs.end(), rng);
@@ -66,8 +65,7 @@ Solution Greedy::generate_greedy(const Instance &instance)
                         continue;
                     if (event_used_days[e.id].count(t.day))
                         continue;
-                    if (instance.teacher_unavailable_times.count(e.teacher_id) &&
-                        instance.teacher_unavailable_times.at(e.teacher_id).count(t.id))
+                    if (instance.teacher_unavailable_times.count(e.teacher_id) && instance.teacher_unavailable_times.at(e.teacher_id).count(t.id))
                         continue;
 
                     Allocation alloc;
@@ -92,8 +90,11 @@ Solution Greedy::generate_greedy(const Instance &instance)
                     class_used[e.class_id].insert(t.id);
                     class_used[e.class_id].insert(next_id);
                     event_used_days[e.id].insert(t.day);
+
                     remaining_duration[e.id] -= 2;
+
                     allocated = true;
+
                     break;
                 }
                 if (!allocated)
@@ -114,8 +115,7 @@ Solution Greedy::generate_greedy(const Instance &instance)
                         continue;
                     if (event_used_days[e.id].count(t.day))
                         continue;
-                    if (instance.teacher_unavailable_times.count(e.teacher_id) &&
-                        instance.teacher_unavailable_times.at(e.teacher_id).count(t.id))
+                    if (instance.teacher_unavailable_times.count(e.teacher_id) && instance.teacher_unavailable_times.at(e.teacher_id).count(t.id))
                         continue;
 
                     Allocation alloc;
@@ -135,22 +135,14 @@ Solution Greedy::generate_greedy(const Instance &instance)
                     teacher_used[e.teacher_id].insert(t.id);
                     class_used[e.class_id].insert(t.id);
                     event_used_days[e.id].insert(t.day);
+
                     remaining_duration[e.id] -= 1;
+
                     allocated = true;
+
                     break;
                 }
-                // if (!allocated)
-                // {
-                //     complete_solution = false;
-                //     Allocation alloc;
-                //     alloc.event_id = e.id;
-                //     alloc.time_id = "UNALLOCATED";
-                //     alloc.duration = remaining_duration[e.id];
-                //     sol.allocations.push_back(alloc);
-                //     sol.event_allocations[e.id].push_back(alloc);
-                //     sol.allocated_duration[e.id] += remaining_duration[e.id];
-                //     break;
-                // }
+              
                 if (!allocated)
                 {
                     complete_solution = false;
@@ -265,7 +257,9 @@ void Greedy::generate_greedy(vector<string> destroyed_events, Solution &solution
                     solution.class_occupation[next_id].insert(e.class_id);
 
                     remaining_duration[e.id] -= 2;
+
                     allocated = true;
+
                     break;
                 }
                 if (!allocated)
@@ -304,7 +298,9 @@ void Greedy::generate_greedy(vector<string> destroyed_events, Solution &solution
                     solution.class_occupation[t.id].insert(e.class_id);
 
                     remaining_duration[e.id] -= 1;
+
                     allocated = true;
+                    
                     break;
                 }
 
@@ -315,6 +311,7 @@ void Greedy::generate_greedy(vector<string> destroyed_events, Solution &solution
                 }
             }
         }
+
         if (complete_solution)
             break;
     }

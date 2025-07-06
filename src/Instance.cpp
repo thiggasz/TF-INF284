@@ -38,10 +38,9 @@ void Instance::load(const string &filename)
         if (day_elem)
         {
             t.day = day_elem->Attribute("Reference");
+
             if (t.day.find("gr_") == 0)
-            {
-                t.day = t.day.substr(3); // Remover "gr_"
-            }
+                t.day = t.day.substr(3);
         }
 
         // Obter slot
@@ -50,10 +49,9 @@ void Instance::load(const string &filename)
         {
             string name = name_elem->GetText();
             size_t pos = name.find('_');
+
             if (pos != string::npos)
-            {
                 t.slot = stoi(name.substr(pos + 1));
-            }
         }
 
         // Verificar duração máxima
@@ -86,22 +84,16 @@ void Instance::load(const string &filename)
 
         XMLElement *name_elem = res_elem->FirstChildElement("Name");
         if (name_elem && name_elem->GetText())
-        {
             r.name = name_elem->GetText();
-        }
 
         XMLElement *type_elem = res_elem->FirstChildElement("ResourceType");
         if (type_elem && type_elem->Attribute("Reference"))
-        {
             r.type = type_elem->Attribute("Reference");
-        }
 
         resources.push_back(r);
 
         if (r.type == "Teacher")
-        {
             teacher_name[r.id] = r.name;
-        }
     }
 
     // Carregar eventos
@@ -114,15 +106,11 @@ void Instance::load(const string &filename)
 
         XMLElement *duration_elem = event_elem->FirstChildElement("Duration");
         if (duration_elem && duration_elem->GetText())
-        {
             e.total_duration = atoi(duration_elem->GetText());
-        }
 
         XMLElement *course_elem = event_elem->FirstChildElement("Course");
         if (course_elem && course_elem->Attribute("Reference"))
-        {
             e.course_id = course_elem->Attribute("Reference");
-        }
 
         // Obter recursos (professor e turma)
         XMLElement *resources = event_elem->FirstChildElement("Resources");
@@ -157,15 +145,11 @@ void Instance::load(const string &filename)
 
         XMLElement *required_elem = constr_elem->FirstChildElement("Required");
         if (required_elem && required_elem->GetText())
-        {
             c.required = (string(required_elem->GetText()) == "true");
-        }
-
+        
         XMLElement *weight_elem = constr_elem->FirstChildElement("Weight");
         if (weight_elem && weight_elem->GetText())
-        {
             c.weight = atoi(weight_elem->GetText());
-        }
 
         // Aplicação da restrição
         XMLElement *applies_to = constr_elem->FirstChildElement("AppliesTo");
@@ -178,9 +162,7 @@ void Instance::load(const string &filename)
                 for (XMLElement *eg = event_groups->FirstChildElement("EventGroup"); eg; eg = eg->NextSiblingElement("EventGroup"))
                 {
                     if (eg->Attribute("Reference"))
-                    {
                         c.applies_to_events.insert(eg->Attribute("Reference"));
-                    }
                 }
             }
 
@@ -191,9 +173,7 @@ void Instance::load(const string &filename)
                 for (XMLElement *t = teachers->FirstChildElement("Resource"); t; t = t->NextSiblingElement("Resource"))
                 {
                     if (t->Attribute("Reference"))
-                    {
                         c.applies_to_teachers.insert(t->Attribute("Reference"));
-                    }
                 }
             }
 
@@ -204,9 +184,7 @@ void Instance::load(const string &filename)
                 for (XMLElement *cl = classes->FirstChildElement("ResourceGroup"); cl; cl = cl->NextSiblingElement("ResourceGroup"))
                 {
                     if (cl->Attribute("Reference"))
-                    {
                         c.applies_to_classes.insert(cl->Attribute("Reference"));
-                    }
                 }
             }
         }
@@ -218,9 +196,7 @@ void Instance::load(const string &filename)
             for (XMLElement *tm = times->FirstChildElement("Time"); tm; tm = tm->NextSiblingElement("Time"))
             {
                 if (tm->Attribute("Reference"))
-                {
                     c.applies_to_times.insert(tm->Attribute("Reference"));
-                }
             }
         }
 
@@ -229,60 +205,38 @@ void Instance::load(const string &filename)
         {
             XMLElement *duration_elem = constr_elem->FirstChildElement("Duration");
             if (duration_elem && duration_elem->GetText())
-            {
                 c.duration_constraint = atoi(duration_elem->GetText());
-            }
 
             XMLElement *min_elem = constr_elem->FirstChildElement("Minimum");
             if (min_elem && min_elem->GetText())
-            {
                 c.min_value = atoi(min_elem->GetText());
-            }
 
             XMLElement *max_elem = constr_elem->FirstChildElement("Maximum");
             if (max_elem && max_elem->GetText())
-            {
                 c.max_value = atoi(max_elem->GetText());
-            }
 
             for (const string &course_id : c.applies_to_events)
-            {
                 course_split_constraints[course_id] = make_pair(c.min_value, c.max_value);
-            }
         }
         else if (c.type == string("ClusterBusyTimesConstraint"))
         {
             XMLElement *min_elem = constr_elem->FirstChildElement("Minimum");
             if (min_elem && min_elem->GetText())
-            {
                 c.min_value = atoi(min_elem->GetText());
-            }
 
             XMLElement *max_elem = constr_elem->FirstChildElement("Maximum");
             if (max_elem && max_elem->GetText())
-            {
                 c.max_value = atoi(max_elem->GetText());
-            }
 
             for (const string &teacher_id : c.applies_to_teachers)
-            {
                 teacher_max_days[teacher_id] = c.max_value;
-            }
         }
         else if (c.type == string("AvoidUnavailableTimesConstraint"))
         {
             for (const string &teacher_id : c.applies_to_teachers)
             {
                 for (const string &time_id : c.applies_to_times)
-                {
                     teacher_unavailable_times[teacher_id].insert(time_id);
-
-                    // cout << "---------- START DEBUG ----------" << endl;
-                    // cout << "teacher_id: " << teacher_id << endl;
-                    // cout << "time_id: " << time_id << endl;
-                    // cout << "---------- END DEBUG ----------" << endl;
-
-                }
             }
         }
 
@@ -290,9 +244,8 @@ void Instance::load(const string &filename)
     }
     
     unordered_map<string, vector<TimeInfo>> times_by_day;
-    for (const TimeInfo &t : times) {
+    for (const TimeInfo &t : times)
         times_by_day[t.day].push_back(t);
-    }
 
     for (auto &pair : times_by_day) {
         vector<TimeInfo> &times_in_day = pair.second;
@@ -301,9 +254,8 @@ void Instance::load(const string &filename)
                 return a.slot < b.slot; 
             });
 
-        for (int i = 0; i < (int)times_in_day.size() - 1; i++) {
+        for (int i = 0; i < (int)times_in_day.size() - 1; i++)
             next_time[times_in_day[i].id] = times_in_day[i+1].id;
-        }
     }
 
 }

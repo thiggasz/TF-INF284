@@ -1,2 +1,4 @@
-a.out
 settings.json
+*.out
+*.xml
+*.txt

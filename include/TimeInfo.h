@@ -11,7 +11,7 @@ public:
     string id;
     string day;
     int slot;
-    int max_duration; // 1 ou 2
+    int max_duration;
 };
 
 #endif

@@ -19,14 +19,10 @@ void Evaluator::check_hard_constraints(const Instance &instance, const Solution 
     {
         int allocated = 0;
         if (solution.allocated_duration.find(event.id) != solution.allocated_duration.end())
-        {
             allocated = solution.allocated_duration.at(event.id);
-        }
 
         if (allocated != event.total_duration)
-        {
             hard_violations++;
-        }
     }
 
     // AvoidClashesConstraint
@@ -35,39 +31,29 @@ void Evaluator::check_hard_constraints(const Instance &instance, const Solution 
 
     for (const Allocation &alloc : solution.allocations)
     {
-        if (alloc.time_id == "UNALLOCATED")
-            continue;
-
         const EventInfo &event = instance.events.at(instance.event_index.at(alloc.event_id));
 
         if (teacher_allocations[alloc.time_id].count(event.teacher_id))
-        {
             hard_violations++;
-        }
+        
         teacher_allocations[alloc.time_id].insert(event.teacher_id);
 
         if (class_allocations[alloc.time_id].count(event.class_id))
-        {
             hard_violations++;
-        }
+        
         class_allocations[alloc.time_id].insert(event.class_id);
     }
 
     // AvoidUnavailableTimesConstraint
     for (const Allocation &alloc : solution.allocations)
     {
-        if (alloc.time_id == "UNALLOCATED")
-            continue;
-
         const EventInfo &event = instance.events.at(instance.event_index.at(alloc.event_id));
 
         if (instance.teacher_unavailable_times.count(event.teacher_id))
         {
             const auto &unavailable_times = instance.teacher_unavailable_times.at(event.teacher_id);
             if (unavailable_times.count(alloc.time_id))
-            {
                 hard_violations++;
-            }
         }
     }
 
@@ -80,9 +66,7 @@ void Evaluator::check_hard_constraints(const Instance &instance, const Solution 
             for (const auto &day_count : day_counts_it->second)
             {
                 if (day_count.second > 1)
-                {
                     hard_violations++;
-                }
             }
         }
     }
@@ -101,18 +85,15 @@ void Evaluator::check_soft_constraints(const Instance &instance, const Solution 
 
             int actual_double = 0;
             if (solution.event_double_lessons.count(event.id))
-            {
                 actual_double = solution.event_double_lessons.at(event.id);
-            }
-
+            
             if (actual_double < min_double || actual_double > max_double)
             {
                 soft_violations++;
                 int cost = 1;
                 for (const auto &c : instance.constraints)
                 {
-                    if (c.type == "DistributeSplitEventsConstraint" &&
-                        c.applies_to_events.count(event.course_id))
+                    if (c.type == "DistributeSplitEventsConstraint" && c.applies_to_events.count(event.course_id))
                     {
                         cost = c.weight;
                         break;
@@ -134,9 +115,7 @@ void Evaluator::check_soft_constraints(const Instance &instance, const Solution 
             int actual_days = 0;
 
             if (solution.teacher_schedule.count(teacher_id))
-            {
                 actual_days = solution.teacher_schedule.at(teacher_id).size();
-            }
 
             if (actual_days > max_days)
             {
@@ -144,8 +123,7 @@ void Evaluator::check_soft_constraints(const Instance &instance, const Solution 
                 int cost = 1;
                 for (const auto &c : instance.constraints)
                 {
-                    if (c.type == "ClusterBusyTimesConstraint" &&
-                        c.applies_to_teachers.count(teacher_id))
+                    if (c.type == "ClusterBusyTimesConstraint" && c.applies_to_teachers.count(teacher_id))
                     {
                         cost = c.weight;
                         break;
@@ -167,21 +145,18 @@ void Evaluator::check_soft_constraints(const Instance &instance, const Solution 
             vector<int> slots;
             for (const Allocation &alloc : solution.allocations)
             {
-                // Skip unallocated entries
-                if (alloc.time_id == "UNALLOCATED")
-                    continue;
-
                 const EventInfo &event = instance.events.at(instance.event_index.at(alloc.event_id));
                 if (event.teacher_id == teacher_id)
                 {
                     const auto it_time = instance.time_index.find(alloc.time_id);
+
                     if (it_time == instance.time_index.end())
                         continue;
+
                     const TimeInfo &t = instance.times.at(it_time->second);
+
                     if (t.day == day)
-                    {
                         slots.push_back(t.slot);
-                    }
                 }
             }
 

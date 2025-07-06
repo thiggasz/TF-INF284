@@ -13,70 +13,6 @@ double BeeColony::evaluate(Solution &sol)
     return evaluator.hard_violations * 1000 + evaluator.total_cost;
 }
 
-pair<Solution, vector<string>> BeeColony::destroy_random(Solution solution, int num_events)
-{
-    vector<string> all_event_ids;
-    for (const auto &e : instance.events)
-    {
-        all_event_ids.push_back(e.id);
-    }
-
-    unsigned seed = chrono::system_clock::now().time_since_epoch().count();
-    shuffle(all_event_ids.begin(), all_event_ids.end(), mt19937(seed));
-
-    vector<string> selected;
-    int n = min(num_events, (int)all_event_ids.size());
-    for (int i = 0; i < n; i++)
-    {
-        selected.push_back(all_event_ids[i]);
-    }
-
-    IteratedGreedy iterated_greedy;
-
-    for (const auto &event_id : selected)
-    {
-        iterated_greedy.remove_allocations(event_id, solution, instance);
-    }
-
-    return {solution, selected};
-}
-
-Solution BeeColony::perturb_solution(Solution sol)
-{
-    int destruction_rate = max(1, (int)(instance.events.size() * this->destruction_rate));
-    auto [new_sol, destroyed] = destroy_random(sol, destruction_rate);
-
-    Greedy greedy;
-
-    greedy.generate_greedy(destroyed, new_sol, instance);
-
-    // for (const string &event_id : destroyed)
-    // {
-    //     if (instance.event_index.find(event_id) == instance.event_index.end())
-    //         continue;
-
-    //     int attempts = 0;
-    //     int max_attempts = 5; // rever
-    //     int remaining = instance.events[instance.event_index.at(event_id)].total_duration;
-
-    //     while (remaining > 0 && attempts < max_attempts)
-    //     {
-    //         greedy.generate_greedy(destroyed, new_sol, instance, false);
-    //         int allocated_after = new_sol.allocated_duration[event_id];
-    //         remaining = instance.events[instance.event_index.at(event_id)].total_duration - allocated_after;
-
-    //         if (remaining > 0)
-    //         {
-    //             ig.remove_allocations(event_id, new_sol, instance);
-    //             remaining = instance.events[instance.event_index.at(event_id)].total_duration;
-    //         }
-    //         attempts++;
-    //     }
-    // }
-
-    return new_sol;
-}
-
 BeeColony::BeeColony(Instance &inst) : instance(inst) {}
 
 void BeeColony::solve(int pop_size, int limit, int max_cycles, double destruction_rate)
@@ -108,11 +44,14 @@ void BeeColony::solve(int pop_size, int limit, int max_cycles, double destructio
 
     for (int cycle = 0; cycle < max_cycles; cycle++)
     {
-        // Fase das abelhas operárias
+        // Abelhas operárias
         for (int i = 0; i < pop_size; i++)
         {
-            Solution new_solution = perturb_solution(population[i]);
+            IteratedGreedy iterated_greedy;
+            Solution new_solution = iterated_greedy.solve(instance, 1, destruction_rate);
+
             double new_cost = evaluate(new_solution);
+
             if (new_cost < costs[i])
             {
                 population[i] = new_solution;
@@ -126,9 +65,7 @@ void BeeColony::solve(int pop_size, int limit, int max_cycles, double destructio
                 }
             }
             else
-            {
                 trial_counters[i]++;
-            }
         }
 
         double total_fitness = 0.0;
@@ -140,11 +77,9 @@ void BeeColony::solve(int pop_size, int limit, int max_cycles, double destructio
 
         vector<double> probabilities(pop_size);
         for (int i = 0; i < pop_size; i++)
-        {
             probabilities[i] = fitness[i] / total_fitness;
-        }
 
-        // Fase das abelhas observadoras
+        // Abelhas observadoras
         for (int i = 0; i < pop_size; i++)
         {
             double r = (double)rand() / RAND_MAX;
@@ -161,7 +96,9 @@ void BeeColony::solve(int pop_size, int limit, int max_cycles, double destructio
                 }
             }
 
-            Solution new_solution = perturb_solution(population[selected_idx]);
+            IteratedGreedy iterated_greedy;
+            Solution new_solution = iterated_greedy.solve(instance, 1, destruction_rate);
+
             double new_cost = evaluate(new_solution);
 
             if (new_cost < costs[selected_idx])
@@ -177,14 +114,12 @@ void BeeColony::solve(int pop_size, int limit, int max_cycles, double destructio
                 }
             }
             else
-            {
                 trial_counters[selected_idx]++;
-            }
         }
 
         Greedy greedy;
 
-        // Fase das abelhas exploradoras
+        // Abelhas exploradoras
         for (int i = 0; i < pop_size; i++)
         {
             if (trial_counters[i] >= limit)
@@ -202,9 +137,7 @@ void BeeColony::solve(int pop_size, int limit, int max_cycles, double destructio
         }
 
         if (cycle % 10 == 0)
-        {
             cout << "Ciclo " << cycle << ": Melhor custo = " << best_cost << endl;
-        }
     }
 }
 

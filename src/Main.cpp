@@ -3,7 +3,9 @@
 #include "../include/BeeColony.h"
 #include "../include/tinyxml2.h"
 
-#include <iostream>
+#include <chrono>
+#include <ctime>
+#include <iomanip>
 
 using namespace tinyxml2;
 using namespace std;
@@ -51,15 +53,11 @@ vector<Solution> load_solutions_from_xml(const string &filename, const Instance 
 
                 XMLElement *duration_elem = event_elem->FirstChildElement("Duration");
                 if (duration_elem && duration_elem->GetText())
-                {
                     alloc.duration = atoi(duration_elem->GetText());
-                }
 
                 XMLElement *time_elem = event_elem->FirstChildElement("Time");
                 if (time_elem && time_elem->Attribute("Reference"))
-                {
                     alloc.time_id = time_elem->Attribute("Reference");
-                }
 
                 solution.allocations.push_back(alloc);
                 solution.event_allocations[alloc.event_id].push_back(alloc);
@@ -74,36 +72,28 @@ vector<Solution> load_solutions_from_xml(const string &filename, const Instance 
                     solution.teacher_schedule[event.teacher_id].insert(t.day);
 
                     if (alloc.duration == 2)
-                    {
                         solution.event_double_lessons[alloc.event_id]++;
-                    }
                 }
             }
+
             solutions.push_back(solution);
         }
     }
+
     return solutions;
 }
 
-#include <vector>
-#include <string>
-#include <ctime>
-#include <iomanip>
-#include <sstream>
-
-std::string solutionToXML(
-    const std::vector<Allocation> &allocations,
-    const std::string &instanceId = "BrazilInstance1_XHSTT-v2014")
+string solutionToXML(
+    const vector<Allocation> &allocations,
+    const string &instanceId = "BrazilInstance1_XHSTT-v2014")
 {
-    // Gerar data atual no formato "December 2011"
-    auto t = std::time(nullptr);
-    auto tm = *std::localtime(&t);
-    std::ostringstream dateStream;
-    dateStream << std::put_time(&tm, "%B %Y");
-    std::string currentDate = dateStream.str();
+    auto t = time(nullptr);
+    auto tm = *localtime(&t);
+    ostringstream dateStream;
+    dateStream << put_time(&tm, "%B %Y");
+    string currentDate = dateStream.str();
 
-    // Início do documento XML
-    std::string xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+    string xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
     xml += "<HighSchoolTimetableArchive>\n";
     xml += "  <SolutionGroups>\n";
     xml += "    <SolutionGroup Id=\"GeneratedSolution\">\n";
@@ -115,16 +105,14 @@ std::string solutionToXML(
     xml += "      <Solution Reference=\"" + instanceId + "\">\n";
     xml += "        <Events>\n";
 
-    // Adicionar cada alocação como evento
     for (const auto &alloc : allocations)
     {
         xml += "          <Event Reference=\"" + alloc.event_id + "\">\n";
-        xml += "            <Duration>" + std::to_string(alloc.duration) + "</Duration>\n";
+        xml += "            <Duration>" + to_string(alloc.duration) + "</Duration>\n";
         xml += "            <Time Reference=\"" + alloc.time_id + "\"/>\n";
         xml += "          </Event>\n";
     }
 
-    // Fechar tags do XML
     xml += "        </Events>\n";
     xml += "      </Solution>\n";
     xml += "    </SolutionGroup>\n";
@@ -154,38 +142,64 @@ int main()
         evaluator.print_report();
     }
 
-    // cout << "\n=== Solução gulosa ===" << endl;
-    // Greedy greedy;
-    // Solution initial_solution = greedy.generate_greedy(instance);
-    // initial_solution.print(instance);
-    // evaluator.evaluate(instance, initial_solution);
-    // evaluator.print_report();
 
-    // cout << "\n=== Solução por Iterated Greedy ===" << endl;
+    cout << "\n=== Solução por Greedy ===" << endl;
+
+    Greedy greedy;
+
+    auto start = chrono::high_resolution_clock::now();
+    Solution initial_solution = greedy.generate_greedy(instance);
+    auto end = chrono::high_resolution_clock::now();
+
+    initial_solution.print(instance);
+    evaluator.evaluate(instance, initial_solution);
+    evaluator.print_report();
+
+    auto duration = chrono::duration_cast<chrono::milliseconds>(end - start);
+    cout << "Suolução por Greedy - Tempo de execução: " << duration.count() << " milissegundos" << endl;
+
+    cout << "\n=== Solução por Iterated Greedy ===" << endl;
+
     IteratedGreedy iterated_greedy;
+
+    start = chrono::high_resolution_clock::now();
     Solution iterated_greedy_solution = iterated_greedy.solve(instance, 200, 0.3);
-    // iterated_greedy_solution.print(instance);
-    // evaluator.evaluate(instance, iterated_greedy_solution);
-    // evaluator.print_report();
+    end = chrono::high_resolution_clock::now();
 
-    // cout << "\n=== Melhor solução Bee Colony ===" << endl;
+    iterated_greedy_solution.print(instance);
+    evaluator.evaluate(instance, iterated_greedy_solution);
+    evaluator.print_report();
 
-    // int population = 15;
-    // int limit = 50;
-    // int max_cycles = 200;
-    // double destruction_rate = 0.15;
+    duration = chrono::duration_cast<chrono::milliseconds>(end - start);
+    cout << "Solução por Iterated Greedy - Tempo de execução: " << duration.count() << " milissegundos" << endl;
 
-    // BeeColony bee_colony(instance);
-    // bee_colony.solve(population, limit, max_cycles, destruction_rate);
+    string xmlSolution_ig = solutionToXML(iterated_greedy_solution.allocations);
+    cout << xmlSolution_ig << endl;
 
-    // Solution bee_colony_solution = bee_colony.getBestSolution();
-    // bee_colony_solution.print(instance);
+    cout << "\n=== Solução por Artificial Bee Colony ===" << endl;
 
-    // evaluator.evaluate(instance, bee_colony_solution);
-    // evaluator.print_report();
+    int population = 15;
+    int limit = 50;
+    int max_cycles = 200;
+    double destruction_rate = 0.15;
 
-    std::string xmlSolution = solutionToXML(iterated_greedy_solution.allocations);
-    std::cout << xmlSolution << std::endl;
+    BeeColony bee_colony(instance);
+
+    start = chrono::high_resolution_clock::now();
+    bee_colony.solve(population, limit, max_cycles, destruction_rate);
+    end = chrono::high_resolution_clock::now();
+
+    duration = chrono::duration_cast<chrono::milliseconds>(end - start);
+    cout << "Solução por Artificial Bee Colony - Tempo de execução: " << duration.count() << " milissegundos" << endl;
+
+    Solution bee_colony_solution = bee_colony.getBestSolution();
+    bee_colony_solution.print(instance);
+
+    evaluator.evaluate(instance, bee_colony_solution);
+    evaluator.print_report();
+
+    string xmlSolution_bee = solutionToXML(bee_colony_solution.allocations);
+    cout << xmlSolution_bee << endl;
 
     return 0;
 }

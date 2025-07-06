@@ -10,7 +10,7 @@ class ResourceInfo
 public:
     string id;
     string name;
-    string type; // "Teacher" ou "Class"
+    string type;
 };
 
 #endif
