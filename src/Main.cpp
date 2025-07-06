@@ -142,6 +142,8 @@ int main()
         evaluator.print_report();
     }
 
+    cout << path << endl;
+
     cout << "\n=== Solução por Greedy ===" << endl;
 
     Greedy greedy;
@@ -172,8 +174,9 @@ int main()
     duration = chrono::duration_cast<chrono::milliseconds>(end - start);
     cout << "Solução por Iterated Greedy - Tempo de execução: " << duration.count() << " milissegundos" << endl;
 
-    string xmlSolution_ig = solutionToXML(iterated_greedy_solution.allocations);
-    cout << "\n" << xmlSolution_ig << endl;
+    // string xmlSolution_ig = solutionToXML(iterated_greedy_solution.allocations);
+    // cout << "\n"
+    //      << xmlSolution_ig << endl;
 
     cout << "\n=== Solução por Artificial Bee Colony ===" << endl;
 
@@ -197,8 +200,9 @@ int main()
     evaluator.evaluate(instance, bee_colony_solution);
     evaluator.print_report();
 
-    string xmlSolution_bee = solutionToXML(bee_colony_solution.allocations);
-    cout << "\n" << xmlSolution_bee << endl;
+    // string xmlSolution_bee = solutionToXML(bee_colony_solution.allocations);
+    // cout << "\n"
+    //      << xmlSolution_bee << endl;
 
     return 0;
 }
