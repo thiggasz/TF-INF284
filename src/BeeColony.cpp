@@ -48,7 +48,7 @@ void BeeColony::solve(int pop_size, int limit, int max_cycles, double destructio
         for (int i = 0; i < pop_size; i++)
         {
             IteratedGreedy iterated_greedy;
-            Solution new_solution = iterated_greedy.solve(instance, 1, destruction_rate);
+            Solution new_solution = iterated_greedy.solve(instance, population[i], destruction_rate);
 
             double new_cost = evaluate(new_solution);
 
@@ -97,7 +97,7 @@ void BeeColony::solve(int pop_size, int limit, int max_cycles, double destructio
             }
 
             IteratedGreedy iterated_greedy;
-            Solution new_solution = iterated_greedy.solve(instance, 1, destruction_rate);
+            Solution new_solution = iterated_greedy.solve(instance, population[selected_idx], destruction_rate);
 
             double new_cost = evaluate(new_solution);
 

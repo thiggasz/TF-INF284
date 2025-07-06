@@ -9,7 +9,7 @@
 class IteratedGreedy
 {
 private:
-    vector<string> select_events(const Solution& solution, const Instance& instance, int num_events);
+    vector<string> select_events(const Solution &solution, const Instance &instance, int num_events);
 
     pair<Solution, vector<string>> destroy(Solution solution, int destruction_rate, const Instance &instance);
 
@@ -19,7 +19,8 @@ public:
     void remove_allocations(string event_id, Solution &solution, const Instance &instance);
 
     Solution solve(Instance &instance, int max_iters, float destruction_percentage);
-};
 
+    Solution solve(Instance &instance, const Solution &initial_solution, float destruction_percentage);
+};
 
 #endif

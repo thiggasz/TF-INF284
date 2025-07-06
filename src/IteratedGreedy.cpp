@@ -27,11 +27,11 @@ vector<string> IteratedGreedy::select_events(const Solution &solution, const Ins
         if (instance.course_split_constraints.find(instance.events[instance.event_index.at(event_id)].course_id) != instance.course_split_constraints.end())
         {
             auto constraint = instance.course_split_constraints.at(instance.events[instance.event_index.at(event_id)].course_id);
-            
+
             int min_double = constraint.first;
             int max_double = constraint.second;
             int actual_double = (solution.event_double_lessons.find(event_id) != solution.event_double_lessons.end()) ? solution.event_double_lessons.at(event_id) : 0;
-            
+
             if (actual_double < min_double)
                 cost += (min_double - actual_double) * 10;
 
@@ -50,7 +50,7 @@ vector<string> IteratedGreedy::select_events(const Solution &solution, const Ins
     int n = min(num_events, (int)event_costs.size());
     for (int i = 0; i < n; i++)
         selected.push_back(event_costs[i].first);
-    
+
     return selected;
 }
 
@@ -99,7 +99,7 @@ void IteratedGreedy::remove_allocations(string event_id, Solution &solution, con
                         solution.event_double_lessons.erase(event_id);
                 }
             }
-            
+
             it = solution.allocations.erase(it);
         }
         else
@@ -121,7 +121,7 @@ void IteratedGreedy::remove_allocations(string event_id, Solution &solution, con
             if (e.teacher_id == event.teacher_id)
             {
                 const TimeInfo &t = instance.times.at(instance.time_index.at(alloc.time_id));
-                
+
                 if (t.day == day)
                 {
                     has_other_allocations = true;
@@ -146,11 +146,11 @@ void IteratedGreedy::remove_allocations(string event_id, Solution &solution, con
         for (const Allocation &alloc : solution.allocations)
         {
             const EventInfo &e = instance.events.at(instance.event_index.at(alloc.event_id));
-            
+
             if (e.class_id == event.class_id)
             {
                 const TimeInfo &t = instance.times.at(instance.time_index.at(alloc.time_id));
-                
+
                 if (t.day == day)
                 {
                     has_other_allocations = true;
@@ -165,13 +165,13 @@ void IteratedGreedy::remove_allocations(string event_id, Solution &solution, con
 
     for (const auto &day : days_to_remove)
         solution.class_schedule[event.class_id].erase(day);
-    
+
     if (solution.class_schedule[event.class_id].empty())
         solution.class_schedule.erase(event.class_id);
 
     if (solution.event_day_counts.find(event_id) != solution.event_day_counts.end() && solution.event_day_counts[event_id].empty())
         solution.event_day_counts.erase(event_id);
-    
+
     if (solution.event_double_lessons.find(event_id) != solution.event_double_lessons.end() && solution.event_double_lessons[event_id] == 0)
         solution.event_double_lessons.erase(event_id);
 }
@@ -221,9 +221,9 @@ Solution IteratedGreedy::solve(Instance &instance, int max_iters, float destruct
     for (int i = 0; i < max_iters; i++)
     {
         auto [partial_solution, destroyed] = destroy(current_solution, destruction_rate, instance);
-        
+
         Solution new_solution = rebuild(partial_solution, destroyed, instance);
-        
+
         evaluator.evaluate(instance, new_solution);
         int new_cost = evaluator.hard_violations * 1000 + evaluator.total_cost;
 
@@ -246,6 +246,39 @@ Solution IteratedGreedy::solve(Instance &instance, int max_iters, float destruct
 
         if (i % 50 == 0 && i > 0)
             current_solution = greedy.generate_greedy(instance);
+    }
+
+    return best_solution;
+}
+
+//nva
+Solution IteratedGreedy::solve(Instance &instance, const Solution &initial_solution, float destruction_percentage)
+{
+    int total_events = instance.events.size();
+    int destruction_rate = max(1, static_cast<int>(total_events * destruction_percentage));
+
+    Solution current_solution = initial_solution;
+    Solution best_solution = current_solution;
+
+    Evaluator evaluator;
+    evaluator.evaluate(instance, current_solution);
+    int best_cost = evaluator.hard_violations * 1000 + evaluator.total_cost;
+
+    auto [partial_solution, destroyed] = destroy(current_solution, destruction_rate, instance);
+    
+    Solution new_solution = rebuild(partial_solution, destroyed, instance);
+
+    evaluator.evaluate(instance, new_solution);
+    int repaired_cost = evaluator.hard_violations * 1000 + evaluator.total_cost;
+
+    if (repaired_cost < best_cost)
+    {
+        current_solution = new_solution;
+        if (repaired_cost < best_cost)
+        {
+            best_solution = new_solution;
+            best_cost = repaired_cost;
+        }
     }
 
     return best_solution;

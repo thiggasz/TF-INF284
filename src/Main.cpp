@@ -142,7 +142,6 @@ int main()
         evaluator.print_report();
     }
 
-
     cout << "\n=== Solução por Greedy ===" << endl;
 
     Greedy greedy;
@@ -151,12 +150,12 @@ int main()
     Solution initial_solution = greedy.generate_greedy(instance);
     auto end = chrono::high_resolution_clock::now();
 
-    initial_solution.print(instance);
+    // initial_solution.print(instance);
     evaluator.evaluate(instance, initial_solution);
     evaluator.print_report();
 
     auto duration = chrono::duration_cast<chrono::milliseconds>(end - start);
-    cout << "Suolução por Greedy - Tempo de execução: " << duration.count() << " milissegundos" << endl;
+    cout << "Solução por Greedy - Tempo de execução: " << duration.count() << " milissegundos" << endl;
 
     cout << "\n=== Solução por Iterated Greedy ===" << endl;
 
@@ -166,7 +165,7 @@ int main()
     Solution iterated_greedy_solution = iterated_greedy.solve(instance, 200, 0.3);
     end = chrono::high_resolution_clock::now();
 
-    iterated_greedy_solution.print(instance);
+    // iterated_greedy_solution.print(instance);
     evaluator.evaluate(instance, iterated_greedy_solution);
     evaluator.print_report();
 
@@ -174,7 +173,7 @@ int main()
     cout << "Solução por Iterated Greedy - Tempo de execução: " << duration.count() << " milissegundos" << endl;
 
     string xmlSolution_ig = solutionToXML(iterated_greedy_solution.allocations);
-    cout << xmlSolution_ig << endl;
+    cout << "\n" << xmlSolution_ig << endl;
 
     cout << "\n=== Solução por Artificial Bee Colony ===" << endl;
 
@@ -193,13 +192,13 @@ int main()
     cout << "Solução por Artificial Bee Colony - Tempo de execução: " << duration.count() << " milissegundos" << endl;
 
     Solution bee_colony_solution = bee_colony.getBestSolution();
-    bee_colony_solution.print(instance);
+    // bee_colony_solution.print(instance);
 
     evaluator.evaluate(instance, bee_colony_solution);
     evaluator.print_report();
 
     string xmlSolution_bee = solutionToXML(bee_colony_solution.allocations);
-    cout << xmlSolution_bee << endl;
+    cout << "\n" << xmlSolution_bee << endl;
 
     return 0;
 }
