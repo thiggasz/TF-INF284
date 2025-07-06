@@ -186,19 +186,19 @@ pair<Solution, vector<string>> IteratedGreedy::destroy(Solution solution, int de
     return {solution, events_to_destroy};
 }
 
-Solution IteratedGreedy::rebuild(Solution solution, vector<string> &destroyed, Instance &instance)
+Solution IteratedGreedy::rebuild(Solution solution, vector<string> &destroyed, Instance &instance, int rebuild_max_iters)
 {
     sort(destroyed.begin(), destroyed.end(), [&](const string &a, const string &b)
          { return instance.events[instance.event_index.at(a)].total_duration >
                   instance.events[instance.event_index.at(b)].total_duration; });
 
     Greedy greedy;
-    greedy.generate_greedy(destroyed, solution, instance);
+    greedy.generate_greedy(destroyed, solution, instance, rebuild_max_iters);
 
     return solution;
 }
 
-Solution IteratedGreedy::solve(Instance &instance, int max_iters, float destruction_percentage)
+Solution IteratedGreedy::solve(Instance &instance, int max_iters, float destruction_percentage, int rebuild_max_iters)
 {
     int total_events = instance.events.size();
     int destruction_rate = max(1, static_cast<int>(total_events * destruction_percentage));
@@ -222,7 +222,7 @@ Solution IteratedGreedy::solve(Instance &instance, int max_iters, float destruct
     {
         auto [partial_solution, destroyed] = destroy(current_solution, destruction_rate, instance);
 
-        Solution new_solution = rebuild(partial_solution, destroyed, instance);
+        Solution new_solution = rebuild(partial_solution, destroyed, instance, rebuild_max_iters);
 
         evaluator.evaluate(instance, new_solution);
         int new_cost = evaluator.hard_violations * 1000 + evaluator.total_cost;
@@ -252,7 +252,7 @@ Solution IteratedGreedy::solve(Instance &instance, int max_iters, float destruct
 }
 
 //nva
-Solution IteratedGreedy::solve(Instance &instance, const Solution &initial_solution, float destruction_percentage)
+Solution IteratedGreedy::solve(Instance &instance, const Solution &initial_solution, float destruction_percentage, int rebuild_max_iters)
 {
     int total_events = instance.events.size();
     int destruction_rate = max(1, static_cast<int>(total_events * destruction_percentage));
@@ -265,8 +265,8 @@ Solution IteratedGreedy::solve(Instance &instance, const Solution &initial_solut
     int best_cost = evaluator.hard_violations * 1000 + evaluator.total_cost;
 
     auto [partial_solution, destroyed] = destroy(current_solution, destruction_rate, instance);
-    
-    Solution new_solution = rebuild(partial_solution, destroyed, instance);
+
+    Solution new_solution = rebuild(partial_solution, destroyed, instance, rebuild_max_iters);
 
     evaluator.evaluate(instance, new_solution);
     int repaired_cost = evaluator.hard_violations * 1000 + evaluator.total_cost;

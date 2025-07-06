@@ -142,7 +142,7 @@ Solution Greedy::generate_greedy(const Instance &instance)
 
                     break;
                 }
-              
+
                 if (!allocated)
                 {
                     complete_solution = false;
@@ -156,7 +156,7 @@ Solution Greedy::generate_greedy(const Instance &instance)
     return sol;
 }
 
-void Greedy::generate_greedy(vector<string> destroyed_events, Solution &solution, Instance &instance)
+void Greedy::generate_greedy(vector<string> destroyed_events, Solution &solution, Instance &instance, int rebuild_max_iters)
 {
     Solution base_solution = solution;
 
@@ -196,10 +196,18 @@ void Greedy::generate_greedy(vector<string> destroyed_events, Solution &solution
         return solution.event_day_counts[event_id][day] == 0;
     };
 
+    int iter = 0;
     while (!complete_solution)
     {
         solution = base_solution;
         complete_solution = true;
+
+        if (rebuild_max_iters != 0 && iter == rebuild_max_iters)
+        {
+            cout << "Alcançou o número máximo de iterações!" << endl;
+            break;
+        }
+        iter++;
 
         auto remaining_duration = base_remaining_duration;
 
@@ -300,7 +308,7 @@ void Greedy::generate_greedy(vector<string> destroyed_events, Solution &solution
                     remaining_duration[e.id] -= 1;
 
                     allocated = true;
-                    
+
                     break;
                 }
 

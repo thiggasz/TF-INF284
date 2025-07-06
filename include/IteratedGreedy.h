@@ -13,14 +13,14 @@ private:
 
     pair<Solution, vector<string>> destroy(Solution solution, int destruction_rate, const Instance &instance);
 
-    Solution rebuild(Solution solution, vector<string> &destroyed, Instance &instance);
+    Solution rebuild(Solution solution, vector<string> &destroyed, Instance &instance, int rebuild_max_iters);
 
 public:
     void remove_allocations(string event_id, Solution &solution, const Instance &instance);
 
-    Solution solve(Instance &instance, int max_iters, float destruction_percentage);
+    Solution solve(Instance &instance, int max_iters, float destruction_percentage, int rebuild_max_iters);
 
-    Solution solve(Instance &instance, const Solution &initial_solution, float destruction_percentage);
+    Solution solve(Instance &instance, const Solution &initial_solution, float destruction_percentage, int rebuild_max_iters);
 };
 
 #endif

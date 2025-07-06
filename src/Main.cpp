@@ -164,7 +164,7 @@ int main()
     IteratedGreedy iterated_greedy;
 
     start = chrono::high_resolution_clock::now();
-    Solution iterated_greedy_solution = iterated_greedy.solve(instance, 200, 0.3);
+    Solution iterated_greedy_solution = iterated_greedy.solve(instance, 200, 0.3, 200);
     end = chrono::high_resolution_clock::now();
 
     // iterated_greedy_solution.print(instance);

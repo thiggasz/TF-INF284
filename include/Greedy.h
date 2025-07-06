@@ -9,7 +9,7 @@ class Greedy
 public:
     Solution generate_greedy(const Instance &instance);
 
-    void generate_greedy(vector<string> destroyed_events, Solution &solution, Instance &instance);
+    void generate_greedy(vector<string> destroyed_events, Solution &solution, Instance &instance, int rebuild_max_iters);
 };
 
 #endif
